@@ -1,0 +1,205 @@
+package com.slate.music
+
+import android.content.Context
+import android.os.Build
+import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseOutBack
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.slate.music.ui.theme.MusicTheme
+import kotlinx.coroutines.delay
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MusicTheme {
+                var showMainUI by rememberSaveable { mutableStateOf(false) }
+
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    AnimatedContent(
+                        targetState = showMainUI,
+                        transitionSpec = {
+                            fadeIn(animationSpec = tween(1000)) togetherWith
+                            fadeOut(animationSpec = tween(1000))
+                        },
+                        label = "MainTransition"
+                    ) { targetShowMainUI ->
+                        if (targetShowMainUI) {
+                            MainScreen()
+                        } else {
+                            WelcomeScreen(onAnimationFinished = { showMainUI = true })
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Preview
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun WelcomeScreen(onAnimationFinished: () -> Unit = {}) {
+    val context = LocalContext.current
+    var isAppReady by remember { mutableStateOf(false) }
+    var isEntranceComplete by rememberSaveable { mutableStateOf(false) }
+
+    val brushedSteelBrush = remember {
+        Brush.linearGradient(
+            colors = listOf(
+                Color(0xFF6A6D73), // Slightly darker edge to anchor it
+                Color(0xFF9BA0A5), // Smoother transition gray
+                Color(0xFFE5E7EA), // Broad highlight
+                Color(0xFFFFFFFF), // Pure white center gleam
+                Color(0xFF8D9096), // Stronger shadow right after the gleam
+                Color(0xFFB8BCC2)  // Soft edge
+            )
+        )
+    }
+
+    LaunchedEffect(Unit) {
+        delay(100)
+        isAppReady = true
+    }
+
+    LaunchedEffect(isAppReady) {
+        if (isAppReady && !isEntranceComplete) {
+            // Wait for entrance to finish (stagger + duration) + 1s hold
+            // Max stagger (2 * 100ms) + duration (1600ms) + hold (1000ms)
+            delay(200 + 1600 + 1000)
+            isEntranceComplete = true
+            onAnimationFinished()
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row {
+                val headline = "3AM"
+
+                headline.forEachIndexed { index, character ->
+                    var isVisible by rememberSaveable { mutableStateOf(false) }
+                    val blurAnim = remember { Animatable(if (isVisible) 0f else 1f) }
+
+                    LaunchedEffect(isAppReady) {
+                        if (isAppReady && !isVisible) {
+                            delay(index * 100L)
+                            isVisible = true
+
+                            try {
+                                val vib = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                    val vm = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                                    vm.defaultVibrator
+                                } else {
+                                    @Suppress("DEPRECATION")
+                                    context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                                }
+
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && 
+                                        vib.areAllPrimitivesSupported(VibrationEffect.Composition.PRIMITIVE_TICK)) {
+                                        vib.vibrate(
+                                            VibrationEffect.startComposition()
+                                                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1.0f)
+                                                .compose()
+                                        )
+                                    } else {
+                                        vib.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+                                    }
+                                } else {
+                                    @Suppress("DEPRECATION")
+                                    vib.vibrate(10)
+                                }
+                            } catch (e: Exception) {
+                                // Ignore haptic errors
+                            }
+
+                            blurAnim.animateTo(
+                                targetValue = 0f,
+                                animationSpec = tween(
+                                    durationMillis = 1600,
+                                    easing = EaseOutBack
+                                )
+                            )
+                        }
+                    }
+
+                    AnimatedVisibility(
+                        visible = isVisible,
+                        enter = slideInVertically(
+                            initialOffsetY = { it },
+                            animationSpec = tween(
+                                durationMillis = 1000,
+                                easing = EaseOutBack
+                            )
+                        ) + fadeIn(
+                            animationSpec = tween(durationMillis = 300)
+                        )
+                    ) {
+                        Text(
+                            text = character.toString(),
+                            style = MaterialTheme.typography.displayLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 2.sp,
+                                brush = brushedSteelBrush,
+                                shadow = Shadow(
+                                    color = Color.Black.copy(alpha = 0.6f),
+                                    offset = Offset(0f, 4f),
+                                    blurRadius = 6f
+                                )
+                            ),
+                            fontSize = 180.sp,
+                            modifier = Modifier
+                                .blur(radius = (blurAnim.value * 12).dp)
+                                .graphicsLayer { alpha = 1f - (blurAnim.value * 0.3f) }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
