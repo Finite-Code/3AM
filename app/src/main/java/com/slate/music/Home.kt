@@ -97,12 +97,12 @@ fun HomeScreen() {
     val brushedSteelBrush = remember {
         Brush.linearGradient(
             colors = listOf(
-                Color(0xFF6A6D73), // Slightly darker edge to anchor it
+                Color(0xF06A6D73), // Slightly darker edge to anchor it
                 Color(0xFF9BA0A5), // Smoother transition gray
-                Color(0xFFE5E7EA), // Broad highlight
-                Color(0xFFFFFFFF), // Pure white center gleam
+                Color(0xFFEFB4E0), // Slightly Red, Broad highlight
+                Color(0xFFD2D2FF), // Bluish center gleam
                 Color(0xFF8D9096), // Stronger shadow right after the gleam
-                Color(0xFFB8BCC2)  // Soft edge
+                Color(0xEBB8BCC2)  // Soft edge
             )
         )
     }
