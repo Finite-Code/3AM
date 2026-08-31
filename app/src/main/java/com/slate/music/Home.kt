@@ -53,6 +53,8 @@ fun HomeScreen() {
     val hazeState = remember { HazeState() }
     val scrollState = rememberLazyListState()
 
+    var selectedTab by remember { mutableStateOf(0) }
+
     // 1. Define sticky header heights
     val headerMaxHeight = 320.dp
     val stickyHeaderHeight = 240.dp 
@@ -142,7 +144,8 @@ fun HomeScreen() {
             LazyColumn(
                 state = scrollState,
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = 90.dp)
             ) {
                 item {
                     val spacerHeight = (headerMaxHeight - stickyHeaderHeight).coerceAtLeast(0.dp)
@@ -232,6 +235,13 @@ fun HomeScreen() {
                 
                 item { Spacer(modifier = Modifier.height(100.dp)) }
             }
+
+            BottomBar(
+                selectedTab = selectedTab,
+                onTabSelected = { selectedTab = it },
+                onSearchClick = { /* TODO: Start Search Action */ },
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
         }
     }
 }
