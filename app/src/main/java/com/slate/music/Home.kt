@@ -30,6 +30,11 @@ import androidx.compose.foundation.lazy.*
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.animation.core.Spring
+import androidx.compose.ui.platform.LocalContext
+import android.content.Context
+import android.os.VibrationEffect
+import android.os.VibratorManager
+import android.os.Build
 
 data class Track(
     val id: String,
@@ -66,8 +71,19 @@ fun HomeScreen() {
     }
 
     val collapseFraction = (scrollOffset / maxScrollPx).coerceIn(0f, 1f)
-
     val isCollapsed = collapseFraction > 0.5f
+
+    val context = LocalContext.current
+    val vibrator = remember(context){
+        val manager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        manager.defaultVibrator
+    }
+
+    LaunchedEffect(isCollapsed) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)) // Should I try click or tick? gonna try the newer click thing for now
+        }
+    }
 
     val snappedFraction by animateFloatAsState(
         targetValue = if (isCollapsed) 1f else 0f,
