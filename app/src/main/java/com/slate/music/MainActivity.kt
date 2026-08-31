@@ -37,12 +37,38 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slate.music.ui.theme.MusicTheme
 import kotlinx.coroutines.delay
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.slate.music.Heart.HeartEngine
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val context = LocalContext.current
+
+            val mediaPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Manifest.permission.READ_MEDIA_AUDIO
+            } else {
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            }
+
+            val permissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission()
+            ) { isGranted ->
+                if (isGranted) {
+                    HeartEngine.initialize(context)
+                    HeartEngine.scanNow()
+                }
+            }
+
+            LaunchedEffect(Unit) {
+                HeartEngine.initialize(context)
+                permissionLauncher.launch(mediaPermission)
+            }
+
             MusicTheme {
                 var showMainUI by rememberSaveable { mutableStateOf(false) }
 

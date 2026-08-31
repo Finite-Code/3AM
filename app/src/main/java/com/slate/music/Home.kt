@@ -2,8 +2,6 @@
 
 package com.slate.music
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,11 +28,15 @@ import androidx.compose.foundation.lazy.*
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.ui.platform.LocalContext
 import android.content.Context
 import android.os.VibrationEffect
 import android.os.VibratorManager
+import android.os.Vibrator
 import android.os.Build
+import com.slate.music.Heart.HeartEngine
 
 data class Track(
     val id: String,
@@ -74,9 +76,14 @@ fun HomeScreen() {
     val isCollapsed = collapseFraction > 0.5f
 
     val context = LocalContext.current
-    val vibrator = remember(context){
-        val manager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-        manager.defaultVibrator
+    val vibrator = remember(context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val manager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            manager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
     }
 
     LaunchedEffect(isCollapsed) {
@@ -107,11 +114,22 @@ fun HomeScreen() {
         )
     }
 
-    val sampleTracks = listOf(
-        Track("1", "Blinding Lights", "The Weeknd", "", "4:03"),
-        Track("2", "Mesmerizing Lights", "The Monday", "", "4:03"),
-        Track("3", "Lovely Lights", "Bro on Tuesday", "", "4:03"),
-    )
+    val songs by HeartEngine.songs.collectAsState()
+    val isScanning by HeartEngine.isScanning.collectAsState()
+
+    val displayTracks = remember(songs) {
+        songs.map { song ->
+            val mins = (song.durationMs / 1000 / 60).toInt()
+            val secs = (song.durationMs / 1000 % 60).toInt()
+            Track(
+                id = song.id.toString(),
+                title = song.title,
+                artist = song.artist,
+                imageUrl = song.albumArtUri ?: "",
+                duration = String.format("%d:%02d", mins, secs)
+            )
+        }
+    }
 
     Scaffold(
         containerColor = Color.Black
@@ -143,8 +161,8 @@ fun HomeScreen() {
                                     noiseFactor(0f)
                                     progressive(
                                         HazeProgressive.verticalGradient(
-                                            startIntensity = 1f,
-                                            endIntensity = 0f
+                                            startIntensity = 0.48f,
+                                            endIntensity = 0.001f
                                         )
                                     )
                                 }
@@ -152,7 +170,7 @@ fun HomeScreen() {
                             .background(
                                 Brush.verticalGradient(
                                     colors = listOf(
-                                        Color.Black.copy(alpha = 0.64f * collapseFraction),
+                                        Color.Black.copy(alpha = 2f * collapseFraction),
                                         Color.Black.copy(alpha = 0.001f * collapseFraction)
                                     )
                                 )
@@ -188,8 +206,8 @@ fun HomeScreen() {
                 item { 
                     MusicSectionRow(
                         title = "Top Played", 
-                        tracks = sampleTracks, 
-                        onTrackSelected = {},
+                        tracks = displayTracks, 
+                        onTrackSelected = { track -> /* Gotta hit some music! */ },
                         hazeState = hazeState
                     ) 
                 }
@@ -197,8 +215,8 @@ fun HomeScreen() {
                 item { 
                     MusicSectionRow(
                         title = "Your Top Artists", 
-                        tracks = sampleTracks, 
-                        onTrackSelected = {},
+                        tracks = displayTracks, 
+                        onTrackSelected = { track -> /* Gotta hit some music! */ },
                         hazeState = hazeState
                     ) 
                 }
@@ -206,8 +224,8 @@ fun HomeScreen() {
                 item { 
                     MusicSectionRow(
                         title = "Favourites <3", 
-                        tracks = sampleTracks, 
-                        onTrackSelected = {},
+                        tracks = displayTracks, 
+                        onTrackSelected = { track -> /* Gotta hit some music! */ },
                         hazeState = hazeState
                     ) 
                 }
