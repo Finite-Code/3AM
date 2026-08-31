@@ -35,6 +35,7 @@ android {
 }
 
 dependencies {
+    implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("dev.chrisbanes.haze:haze:2.0.0-beta02")
     implementation("dev.chrisbanes.haze:haze-blur:2.0.0-beta02")
     implementation(libs.androidx.compose.animation.core)

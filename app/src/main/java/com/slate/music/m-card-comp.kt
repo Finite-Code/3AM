@@ -20,6 +20,8 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -42,11 +44,20 @@ fun SquareMusicCard(
         Box(modifier = Modifier.fillMaxSize()) {
             // 1. Album Art Background
             // (Replace this Box with Coil's AsyncImage in your real app)
-            Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .background(Color.Transparent)
-            )
+            if(track.imageUrl.isNotEmpty()) {
+                AsyncImage(
+                    model = track.imageUrl,
+                    contentDescription = "Album Art :)",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.DarkGray)
+                )
+            }
 
             // 2. Gradient overlay so the white text is always readable
             // no matter how bright the album art is

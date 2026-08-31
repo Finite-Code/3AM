@@ -38,12 +38,40 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slate.music.ui.theme.MusicTheme
 import kotlinx.coroutines.delay
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.slate.music.Heart.HeartEngine
+import androidx.compose.runtime.collectAsState
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val context = LocalContext.current
+
+            val mediaPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Manifest.permission.READ_MEDIA_AUDIO
+            } else {
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            }
+
+            val permissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission()
+            ) { isGranted ->
+                if (isGranted) {
+                    HeartEngine.scanNow()
+                } else {
+                    android.widget.Toast.makeText(context, "Permission required to scan music.", android.widget.Toast.LENGTH_LONG).show()
+                }
+            }
+
+            LaunchedEffect(Unit) {
+                HeartEngine.initialize(context)
+                permissionLauncher.launch(mediaPermission)
+            }
+
             MusicTheme {
                 var showMainUI by rememberSaveable { mutableStateOf(false) }
 
@@ -92,16 +120,18 @@ fun WelcomeScreen(onAnimationFinished: () -> Unit = {}) {
         )
     }
 
+    val isScanning by HeartEngine.isScanning.collectAsState()
+    var minSplashTimeReached by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         delay(100)
         isAppReady = true
+        delay(2000) // Minimum time to show splash
+        minSplashTimeReached = true
     }
 
-    LaunchedEffect(isAppReady) {
-        if (isAppReady && !isEntranceComplete) {
-            // Wait for entrance to finish (stagger + duration) + 1s hold
-            // Max stagger (2 * 100ms) + duration (1600ms) + hold (1000ms)
-            delay(200 + 1600 + 1000)
+    LaunchedEffect(isScanning, minSplashTimeReached) {
+        if (!isScanning && minSplashTimeReached && !isEntranceComplete) {
             isEntranceComplete = true
             onAnimationFinished()
         }
