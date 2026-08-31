@@ -164,8 +164,8 @@ fun HomeScreen() {
                                     noiseFactor(0f)
                                     progressive(
                                         HazeProgressive.verticalGradient(
-                                            startIntensity = 0.48f,
-                                            endIntensity = 0.001f
+                                            startIntensity = (0.48f * collapseFraction),
+                                            endIntensity = (0.001f * collapseFraction)
                                         )
                                     )
                                 }
@@ -174,7 +174,7 @@ fun HomeScreen() {
                                 Brush.verticalGradient(
                                     colors = listOf(
                                         Color.Black.copy(alpha = 2f * collapseFraction),
-                                        Color.Black.copy(alpha = 0.001f * collapseFraction)
+                                        Color.Black.copy(alpha = 0.030f * collapseFraction)
                                     )
                                 )
                             )
