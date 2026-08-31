@@ -2,6 +2,8 @@
 
 package com.slate.music
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.*
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.core.Spring
 
 data class Track(
     val id: String,
@@ -39,9 +42,9 @@ data class Track(
 @Preview
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun MainScreen() {
+fun HomeScreen() {
     val hazeState = remember { HazeState() }
-    val lazyColumnState = rememberLazyListState()
+    val scrollState = rememberLazyListState()
 
     // 1. Define sticky header heights
     val headerMaxHeight = 320.dp
@@ -54,8 +57,8 @@ fun MainScreen() {
 
     val scrollOffset by remember {
         derivedStateOf {
-            if (lazyColumnState.firstVisibleItemIndex == 0) {
-                lazyColumnState.firstVisibleItemScrollOffset.toFloat()
+            if (scrollState.firstVisibleItemIndex == 0) {
+                scrollState.firstVisibleItemScrollOffset.toFloat()
             } else {
                 maxScrollPx + 1000f
             }
@@ -63,6 +66,17 @@ fun MainScreen() {
     }
 
     val collapseFraction = (scrollOffset / maxScrollPx).coerceIn(0f, 1f)
+
+    val isCollapsed = collapseFraction > 0.5f
+
+    val snappedFraction by animateFloatAsState(
+        targetValue = if (isCollapsed) 1f else 0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "SnapAnim"
+    )
 
     val brushedSteelBrush = remember {
         Brush.linearGradient(
@@ -77,7 +91,7 @@ fun MainScreen() {
         )
     }
 
-    val dummies = listOf(
+    val sampleTracks = listOf(
         Track("1", "Blinding Lights", "The Weeknd", "", "4:03"),
         Track("2", "Mesmerizing Lights", "The Monday", "", "4:03"),
         Track("3", "Lovely Lights", "Bro on Tuesday", "", "4:03"),
@@ -85,14 +99,14 @@ fun MainScreen() {
 
     Scaffold(
         containerColor = Color.Black
-    ) { innerPadding ->
+    ) { scaffoldPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = innerPadding.calculateBottomPadding())
+                .padding(bottom = scaffoldPadding.calculateBottomPadding())
         ) {
             LazyColumn(
-                state = lazyColumnState,
+                state = scrollState,
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -122,15 +136,15 @@ fun MainScreen() {
                             .background(
                                 Brush.verticalGradient(
                                     colors = listOf(
-                                        Color.Black.copy(alpha = 5f * collapseFraction),
-                                        Color.Black.copy(alpha = 0f * collapseFraction)
+                                        Color.Black.copy(alpha = 0.64f * collapseFraction),
+                                        Color.Black.copy(alpha = 0.001f * collapseFraction)
                                     )
                                 )
                             )
                     ) {
                         Box(modifier = Modifier.statusBarsPadding().fillMaxSize()) {
-                            val fontSize = (148 - ((148 - 108) * collapseFraction)).sp
-                            val yOffset = ((-16) * (1 - collapseFraction)).dp
+                            val fontSize = (148 - ((148 - 108) * snappedFraction)).sp
+                            val yOffset = ((-16) * (1 - snappedFraction)).dp
 
                             Text(
                                 text = "3AM",
@@ -156,28 +170,28 @@ fun MainScreen() {
 
                 // Use hazeSource specifically on each card or section
                 item { 
-                    HorizontalMusicSection(
+                    MusicSectionRow(
                         title = "Top Played", 
-                        tracks = dummies, 
-                        onTrackClick = {},
+                        tracks = sampleTracks, 
+                        onTrackSelected = {},
                         hazeState = hazeState
                     ) 
                 }
                 
                 item { 
-                    HorizontalMusicSection(
+                    MusicSectionRow(
                         title = "Your Top Artists", 
-                        tracks = dummies, 
-                        onTrackClick = {},
+                        tracks = sampleTracks, 
+                        onTrackSelected = {},
                         hazeState = hazeState
                     ) 
                 }
                 
                 item { 
-                    HorizontalMusicSection(
+                    MusicSectionRow(
                         title = "Favourites <3", 
-                        tracks = dummies, 
-                        onTrackClick = {},
+                        tracks = sampleTracks, 
+                        onTrackSelected = {},
                         hazeState = hazeState
                     ) 
                 }
@@ -190,10 +204,10 @@ fun MainScreen() {
 
 
 @Composable
-fun HorizontalMusicSection(
+fun MusicSectionRow(
     title: String,
     tracks: List<Track>,
-    onTrackClick: (Track) -> Unit,
+    onTrackSelected: (Track) -> Unit,
     hazeState: HazeState
 ) {
     Column(
@@ -220,7 +234,7 @@ fun HorizontalMusicSection(
             items(tracks) { track ->
                 SquareMusicCard(
                     track = track,
-                    onClick = { onTrackClick(track) },
+                    onClick = { onTrackSelected(track) },
                     modifier = Modifier
                         .width(176.dp)
                 )

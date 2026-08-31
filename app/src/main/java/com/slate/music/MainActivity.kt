@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
                         label = "MainTransition"
                     ) { targetShowMainUI ->
                         if (targetShowMainUI) {
-                            MainScreen()
+                            HomeScreen()
                         } else {
                             WelcomeScreen(onAnimationFinished = { showMainUI = true })
                         }
