@@ -1,6 +1,5 @@
 package com.slate.music
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
@@ -8,17 +7,23 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.ui.Alignment.*
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.blur.HazeBlurStyle
+import dev.chrisbanes.haze.blur.hazeBlur
 
 @Composable
 fun BottomBar(
     selectedTab: Int,
     onTabSelected: (Int) -> Unit,
     onSearchClick: () -> Unit,
+    hazeState: HazeState,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -31,8 +36,16 @@ fun BottomBar(
     ) {
         Surface(
             shape = CircleShape,
-            color = Color(0xFF1E1E1E).copy(alpha = 0.9f),
-            shadowElevation = 8.dp
+            color = Color(0xFF1E1E1E).copy(alpha = 0.16f),
+            modifier = Modifier
+                .clip(CircleShape)
+                .hazeBlur(
+                    input = HazeInput.Sources(state = hazeState),
+                    style = HazeBlurStyle {
+                        blurRadius(24.dp)
+                        noiseFactor(0f)
+                    }
+                )
         ) {
             Row(
                 modifier = Modifier
@@ -68,15 +81,27 @@ fun BottomBar(
 
         Surface(
             shape = CircleShape,
-            color = Color(0xFF1E1E1E).copy(alpha = 0.9f),
+            color = Color(0xFF1E1E1E).copy(alpha = 0.16f),
             shadowElevation = 8.dp,
-            modifier = Modifier.size(52.dp)
+            modifier = Modifier
+                .size(52.dp)
+                .clip(CircleShape)
+                .hazeBlur(
+                    input = HazeInput.Sources(state = hazeState),
+                    style = HazeBlurStyle {
+                        blurRadius(24.dp)
+                        noiseFactor(0f)
+                    }
+                )
         ) {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.fillMaxSize()
             ) {
-                IconButton(onClick = onSearchClick) {
+                IconButton(
+                    onClick = onSearchClick,
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     Icon(
                         imageVector = Icons.Rounded.Search,
                         contentDescription = "Search",

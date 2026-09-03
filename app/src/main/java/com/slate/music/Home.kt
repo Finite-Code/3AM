@@ -240,6 +240,7 @@ fun HomeScreen() {
                 selectedTab = selectedTab,
                 onTabSelected = { selectedTab = it },
                 onSearchClick = { /* TODO: Start Search Action */ },
+                hazeState = hazeState,
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
         }
