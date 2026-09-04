@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.toLowerCase
 import coil.compose.AsyncImage
 
-
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MusicPlayer(
