@@ -34,8 +34,6 @@ import androidx.compose.ui.platform.LocalContext
 import android.content.Context
 import android.os.VibrationEffect
 import android.os.VibratorManager
-import android.os.Vibrator
-import android.os.Build
 import com.slate.music.Heart.HeartEngine
 
 data class Track(
@@ -79,19 +77,12 @@ fun HomeScreen() {
 
     val context = LocalContext.current
     val vibrator = remember(context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val manager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            manager.defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }
+        val manager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        manager.defaultVibrator
     }
 
     LaunchedEffect(isCollapsed) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)) // Should I try click or tick? gonna try the newer click thing for now
-        }
+        vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)) // Should I try click or tick? gonna try the newer click thing for now
     }
 
     val snappedFraction by animateFloatAsState(
@@ -132,6 +123,13 @@ fun HomeScreen() {
             )
         }
     }
+
+    var selectedTrack by remember { mutableStateOf<Track?>(null) }
+    var isPlaying by remember { mutableStateOf(false) }
+    var progress by remember { mutableStateOf(0f) }
+    var liked by remember { mutableStateOf(false) }
+
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Scaffold(
         containerColor = Color.Black
@@ -210,7 +208,7 @@ fun HomeScreen() {
                     MusicSectionRow(
                         title = "Top Played", 
                         tracks = displayTracks, 
-                        onTrackSelected = { track -> /* Gotta hit some music! */ },
+                        onTrackSelected = { track -> selectedTrack = track },
                         hazeState = hazeState
                     ) 
                 }
@@ -219,7 +217,7 @@ fun HomeScreen() {
                     MusicSectionRow(
                         title = "Your Top Artists", 
                         tracks = displayTracks, 
-                        onTrackSelected = { track -> /* Gotta hit some music! */ },
+                        onTrackSelected = { track -> selectedTrack = track },
                         hazeState = hazeState
                     ) 
                 }
@@ -228,7 +226,7 @@ fun HomeScreen() {
                     MusicSectionRow(
                         title = "Favourites <3", 
                         tracks = displayTracks, 
-                        onTrackSelected = { track -> /* Gotta hit some music! */ },
+                        onTrackSelected = { track -> selectedTrack = track },
                         hazeState = hazeState
                     ) 
                 }
@@ -243,6 +241,33 @@ fun HomeScreen() {
                 hazeState = hazeState,
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
+
+            if (selectedTrack != null) {
+                ModalBottomSheet(
+                    onDismissRequest = { selectedTrack = null },
+                    sheetState = sheetState,
+                    containerColor = Color(0xFF121212)
+                ) {
+                    selectedTrack?.let { track ->
+                        MusicPlayer(
+                            title = track.title,
+                            artist = track.artist,
+                            albumArtUrl = track.imageUrl,
+                            isPlaying = isPlaying,
+                            progress = progress,
+                            currentPosText = "1:15",
+                            durtnText = track.duration,
+                            liked = liked,
+                            onPlayPauseToggle = { isPlaying = !isPlaying },
+                            onSkipPrevious = { /* TODO */ },
+                            onSkipNext = { /* TODO */ },
+                            onSeek = { progress = it },
+                            onLikeToggle = { liked = !liked },
+                            modifier = Modifier.padding(bottom = 24.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }
