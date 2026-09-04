@@ -6,15 +6,22 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MotionScheme
 import com.slate.music.R
 
 // 1. Properly declare your custom Six Caps font family
-val sixCapsFontFamily = FontFamily(
+val sixCaps = FontFamily(
     Font(resId = R.font.sixcaps_regular)
+)
+
+val geist = FontFamily (
+    Font(resId = R.font.geist_var)
 )
 
 // 2. Put all text styles inside the single Typography configuration
 val Typography = Typography(
+
     // default body font
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,
@@ -22,6 +29,10 @@ val Typography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
+    ),
+
+    bodyMedium = TextStyle(
+        fontFamily = geist,
     ),
 
     labelLarge = TextStyle(
@@ -32,33 +43,23 @@ val Typography = Typography(
 
     // Six Caps expressive heading styles
     displayLarge = TextStyle(
-        fontFamily = sixCapsFontFamily,
+        fontFamily = sixCaps,
         fontSize = 57.sp
     ),
     headlineLarge = TextStyle(
-        fontFamily = sixCapsFontFamily,
+        fontFamily = sixCaps,
         fontSize = 45.sp
     ),
     headlineMedium = TextStyle(
-        fontFamily = sixCapsFontFamily,
+        fontFamily = sixCaps,
         fontSize = 36.sp
-    )
+    ),
 
-
-    /* Other default text styles to override
     titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = geist,
         fontWeight = FontWeight.Normal,
         fontSize = 22.sp,
         lineHeight = 28.sp,
         letterSpacing = 0.sp
-    ),
-    labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
     )
-    */
 )
