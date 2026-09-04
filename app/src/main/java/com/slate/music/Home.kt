@@ -8,6 +8,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -124,6 +125,11 @@ fun HomeScreen() {
         }
     }
 
+    var favTrackIds by rememberSaveable { mutableStateOf(setOf<String>()) }
+    val favTracks = remember(displayTracks, favTrackIds) {
+        displayTracks.filter { track -> track.id in favTrackIds }
+    }
+
     var selectedTrack by remember { mutableStateOf<Track?>(null) }
     var isPlaying by remember { mutableStateOf(false) }
     var progress by remember { mutableStateOf(0f) }
@@ -225,7 +231,7 @@ fun HomeScreen() {
                 item { 
                     MusicSectionRow(
                         title = "Favourites <3", 
-                        tracks = displayTracks, 
+                        tracks = favTracks,
                         onTrackSelected = { track -> selectedTrack = track },
                         hazeState = hazeState
                     ) 
@@ -249,6 +255,7 @@ fun HomeScreen() {
                     containerColor = Color(0xFF121212)
                 ) {
                     selectedTrack?.let { track ->
+                        val isTrackLiked = track.id in favTrackIds
                         MusicPlayer(
                             title = track.title,
                             artist = track.artist,
@@ -257,12 +264,18 @@ fun HomeScreen() {
                             progress = progress,
                             currentPosText = "1:15",
                             durtnText = track.duration,
-                            liked = liked,
+                            liked = isTrackLiked,
                             onPlayPauseToggle = { isPlaying = !isPlaying },
                             onSkipPrevious = { /* TODO */ },
                             onSkipNext = { /* TODO */ },
                             onSeek = { progress = it },
-                            onLikeToggle = { liked = !liked },
+                            onLikeToggle = {
+                                favTrackIds = if (track.id in favTrackIds) {
+                                    favTrackIds - track.id
+                                } else {
+                                    favTrackIds + track.id
+                                }
+                            },
                             modifier = Modifier.padding(bottom = 24.dp)
                         )
                     }
@@ -295,19 +308,27 @@ fun MusicSectionRow(
                 .padding(start = 16.dp, bottom = 12.dp)
         )
 
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            items(tracks) { track ->
-                SquareMusicCard(
-                    track = track,
-                    onClick = { onTrackSelected(track) },
-                    modifier = Modifier
-                        .width(176.dp)
-                )
+        if (tracks.isEmpty()) {
+            Text(
+                text = "No tracks added yet :(" +
+                        "\nwon't ya' hit some music?",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.DarkGray,
+                modifier = Modifier.padding(start = 16.dp, bottom = 12.dp)
+            )
+        } else {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(tracks, key = { it.id }) { track ->
+                    SquareMusicCard(
+                        track = track,
+                        onClick = { onTrackSelected(track) },
+                        modifier = Modifier.width(176.dp)
+                    )
+                }
             }
         }
     }
