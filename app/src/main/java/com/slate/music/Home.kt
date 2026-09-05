@@ -32,9 +32,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.ui.platform.LocalContext
-import android.content.Context
-import android.os.VibrationEffect
-import android.os.VibratorManager
 import com.slate.music.Heart.HeartEngine
 
 data class Track(
@@ -79,13 +76,8 @@ fun HomeScreen() {
     val isCollapsed = collapseFraction > 0.5f
 
     val context = LocalContext.current
-    val vibrator = remember(context) {
-        val manager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-        manager.defaultVibrator
-    }
-
     LaunchedEffect(isCollapsed) {
-        vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)) // Should I try click or tick? gonna try the newer click thing for now
+        context.performHapticClick()
     }
 
     val snappedFraction by animateFloatAsState(
