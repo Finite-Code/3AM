@@ -1,11 +1,7 @@
 package com.slate.music
 
-import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedContent
@@ -154,33 +150,7 @@ fun WelcomeScreen(onAnimationFinished: () -> Unit = {}) {
                             delay(index * 100L)
                             isVisible = true
 
-                            try {
-                                val vib = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                    val vm = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                                    vm.defaultVibrator
-                                } else {
-                                    @Suppress("DEPRECATION")
-                                    context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                                }
-
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && 
-                                        vib.areAllPrimitivesSupported(VibrationEffect.Composition.PRIMITIVE_TICK)) {
-                                        vib.vibrate(
-                                            VibrationEffect.startComposition()
-                                                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1.0f)
-                                                .compose()
-                                        )
-                                    } else {
-                                        vib.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
-                                    }
-                                } else {
-                                    @Suppress("DEPRECATION")
-                                    vib.vibrate(10)
-                                }
-                            } catch (e: Exception) {
-                                // Ignore haptic errors
-                            }
+                            context.performHapticClick()
 
                             blurAnim.animateTo(
                                 targetValue = 0f,
