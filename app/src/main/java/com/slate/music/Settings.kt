@@ -112,7 +112,7 @@ fun SettingsScreen(
 
                 /* SECTION 1: Audio */
                 item {
-                    SettingsSectionHeader(title = "audio and playback")
+                    SettingsSectionHeader(title = "Audio & Playback")
                 }
 
                 item {
@@ -149,7 +149,7 @@ fun SettingsScreen(
                 /* SECTION 2: Haptics & Visuals */
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-                    SettingsSectionHeader(title = "appearance and haptics")
+                    SettingsSectionHeader(title = "Appearance and Haptics")
                 }
 
                 item {
@@ -175,7 +175,7 @@ fun SettingsScreen(
                 /* SECTION 3: About */
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-                    SettingsSectionHeader(title = "about")
+                    SettingsSectionHeader(title = "About")
                 }
 
                 item {
@@ -196,12 +196,11 @@ fun SettingsScreen(
 @Composable
 fun SettingsSectionHeader(title: String) {
     Text(
-        text = title.lowercase(),
+        text = title,
         style = MaterialTheme.typography.labelMedium,
-        color = Color.LightGray.copy(alpha = 0.6f),
+        color = Color.LightGray.copy(alpha = 0.88f),
         fontWeight = FontWeight.SemiBold,
         fontSize = 13.sp,
-        letterSpacing = 1.sp,
         modifier = Modifier.padding(start = 12.dp, top = 8.dp, bottom = 4.dp)
     )
 }
