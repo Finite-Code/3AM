@@ -52,6 +52,8 @@ fun HomeScreen() {
     val hazeState = remember { HazeState() }
     val scrollState = rememberLazyListState()
 
+    DeadEndHapticHandler(scrollState)
+
     var selectedTab by remember { mutableStateOf(0) }
 
     // 1. Define sticky header heights

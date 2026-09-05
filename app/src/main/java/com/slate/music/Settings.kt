@@ -26,6 +26,7 @@ import dev.chrisbanes.haze.*
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @Composable
 fun SettingsScreen(
@@ -37,6 +38,9 @@ fun SettingsScreen(
     BackHandler(enabled = isVisible){
         onClose()
     }
+
+    val scrollState = rememberLazyListState()
+    DeadEndHapticHandler(scrollState)
 
     val lowSpringAnim = spring<IntOffset>(
         dampingRatio = Spring.DampingRatioLowBouncy,
@@ -67,6 +71,7 @@ fun SettingsScreen(
                 .background(Color.Black)
         ) {
             LazyColumn(
+                state = scrollState,
                 modifier = Modifier
                     .fillMaxSize()
                     .hazeSource(state = hazeState),
