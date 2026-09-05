@@ -23,20 +23,38 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import dev.chrisbanes.haze.*
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.activity.compose.PredictiveBackHandler
+import androidx.compose.ui.graphics.graphicsLayer
+import kotlinx.coroutines.CancellationException
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun SettingsScreen(
     isVisible: Boolean,
     onClose: () -> Unit,
     hazeState: HazeState,
     modifier: Modifier = Modifier
 ) {
-    BackHandler(enabled = isVisible){
-        onClose()
+    var backProgress by remember { mutableFloatStateOf(0f) }
+
+    PredictiveBackHandler(enabled = isVisible) { progressFlow ->
+        try {
+            progressFlow.collect { backEvent ->
+                backProgress = backEvent.progress
+            }
+            onClose()
+        } catch (_: CancellationException) {
+            backProgress = 0f
+        }
+    }
+
+    LaunchedEffect(isVisible) {
+        if (!isVisible) {
+            backProgress = 0f
+        }
     }
 
     val scrollState = rememberLazyListState()
@@ -51,7 +69,7 @@ fun SettingsScreen(
         visible = isVisible,
         enter = slideInVertically(
             initialOffsetY = { fullHeight -> fullHeight / 3 },
-             animationSpec = lowSpringAnim
+            animationSpec = lowSpringAnim
         ) + fadeIn(tween(300)),
         exit = slideOutVertically(
             targetOffsetY = { fullHeight -> fullHeight / 3 },
@@ -65,9 +83,19 @@ fun SettingsScreen(
         var gaplessPlay by remember { mutableStateOf(true) }
         var darkGlass by remember { mutableStateOf(true) }
 
+        val scale = 1f - (backProgress * 0.16f)
+        val cornerRadius = (backProgress * 32).dp
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    clip = true
+                    shape = RoundedCornerShape(cornerRadius)
+                    shadowElevation = (backProgress * 16).dp.toPx()
+                }
                 .background(Color.Black)
         ) {
             LazyColumn(
