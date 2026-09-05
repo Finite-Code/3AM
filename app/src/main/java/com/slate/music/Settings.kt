@@ -89,8 +89,7 @@ fun SettingsScreen(
                         Text(
                             text = "settings",
                             style = MaterialTheme.typography.displayLarge.copy(
-                                fontSize = 42.sp,
-                                fontWeight = FontWeight.Bold
+                                fontSize = 72.sp
                             ),
                             color = Color.White
                         )
