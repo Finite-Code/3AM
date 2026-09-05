@@ -24,6 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import dev.chrisbanes.haze.*
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 
 @Composable
 fun SettingsScreen(
@@ -36,15 +38,20 @@ fun SettingsScreen(
         onClose()
     }
 
+    val lowSpringAnim = spring<IntOffset>(
+        dampingRatio = Spring.DampingRatioLowBouncy,
+        stiffness = Spring.StiffnessLow
+    )
+
     AnimatedVisibility(
         visible = isVisible,
         enter = slideInVertically(
             initialOffsetY = { fullHeight -> fullHeight / 3 },
-            animationSpec = tween(400)
+            animationSpec = lowSpringAnim
         ) + fadeIn(tween(300)),
         exit = slideOutVertically(
             targetOffsetY = { fullHeight -> fullHeight / 3 },
-            animationSpec = tween(300)
+            animationSpec = lowSpringAnim
         ) + fadeOut(tween(300)),
         modifier = modifier
     ) {
