@@ -10,6 +10,8 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialExpressiveTheme
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -34,6 +36,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun MusicTheme(
     darkTheme: Boolean = true, // Dark Theme Only!
     // Dynamic color is available on Android 12+
@@ -50,7 +53,7 @@ fun MusicTheme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
+    MaterialExpressiveTheme(
         colorScheme = colorScheme,
         typography = Typography,
         content = content
