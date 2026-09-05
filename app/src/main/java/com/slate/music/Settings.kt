@@ -47,7 +47,7 @@ fun SettingsScreen(
         visible = isVisible,
         enter = slideInVertically(
             initialOffsetY = { fullHeight -> fullHeight / 3 },
-            animationSpec = lowSpringAnim
+             animationSpec = lowSpringAnim
         ) + fadeIn(tween(300)),
         exit = slideOutVertically(
             targetOffsetY = { fullHeight -> fullHeight / 3 },
@@ -62,7 +62,9 @@ fun SettingsScreen(
         var darkGlass by remember { mutableStateOf(true) }
 
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
         ) {
             LazyColumn(
                 modifier = Modifier
