@@ -248,6 +248,12 @@ fun HomeScreen() {
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
 
+            SettingsScreen(
+                isVisible = selectedTab == 2,
+                onClose = { selectedTab = 0 },
+                hazeState = hazeState
+            )
+
             if (selectedTrack != null) {
                 ModalBottomSheet(
                     onDismissRequest = { selectedTrack = null },
