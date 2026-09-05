@@ -2,8 +2,16 @@
 
 package com.slate.music
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.*
@@ -35,6 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import android.content.Context
 import android.os.VibrationEffect
 import android.os.VibratorManager
+import androidx.compose.foundation.border
 import com.slate.music.Heart.HeartEngine
 
 data class Track(
@@ -147,7 +156,7 @@ fun HomeScreen() {
         ) {
             LazyColumn(
                 state = scrollState,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().hazeSource(state = hazeState),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(bottom = 90.dp)
             ) {
