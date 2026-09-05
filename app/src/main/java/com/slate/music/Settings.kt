@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import dev.chrisbanes.haze.*
+import androidx.activity.compose.BackHandler
 
 @Composable
 fun SettingsScreen(
@@ -29,6 +30,10 @@ fun SettingsScreen(
     hazeState: HazeState,
     modifier: Modifier = Modifier
 ) {
+    BackHandler(enabled = isVisible){
+        onClose()
+    }
+
     AnimatedVisibility(
         visible = isVisible,
         enter = slideInVertically(
