@@ -39,10 +39,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.slate.music.Heart.HeartEngine
 import androidx.compose.runtime.collectAsState
+import com.slate.music.amp.*
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        AmpEngine.initialize(this)
+
         super.onCreate(savedInstanceState)
         setContent {
             val context = LocalContext.current
