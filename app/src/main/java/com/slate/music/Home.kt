@@ -33,6 +33,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.ui.platform.LocalContext
 import com.slate.music.Heart.HeartEngine
+import com.slate.music.amp.AmpEngine
 
 data class Track(
     val id: String,
@@ -102,8 +103,8 @@ fun HomeScreen() {
         )
     }
 
+    val ampState by AmpEngine.state.collectAsState()
     val songs by HeartEngine.songs.collectAsState()
-    val isScanning by HeartEngine.isScanning.collectAsState()
 
     val displayTracks = remember(songs) {
         songs.map { song ->
@@ -125,9 +126,14 @@ fun HomeScreen() {
     }
 
     var selectedTrack by remember { mutableStateOf<Track?>(null) }
-    var isPlaying by remember { mutableStateOf(false) }
-    var progress by remember { mutableStateOf(0f) }
-    var liked by remember { mutableStateOf(false) }
+
+    val handleTrackSelected: (Track) -> Unit = { track ->
+        selectedTrack = track
+        val songIndex = songs.indexOfFirst { it.id.toString() == track.id }
+        if (songIndex >= 0) {
+            AmpEngine.playPlaylist(songs, songIndex)
+        }
+    }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -208,7 +214,7 @@ fun HomeScreen() {
                     MusicSectionRow(
                         title = "Top Played", 
                         tracks = displayTracks, 
-                        onTrackSelected = { track -> selectedTrack = track },
+                        onTrackSelected = handleTrackSelected,
                         hazeState = hazeState
                     ) 
                 }
@@ -217,7 +223,7 @@ fun HomeScreen() {
                     MusicSectionRow(
                         title = "Your Top Artists", 
                         tracks = displayTracks, 
-                        onTrackSelected = { track -> selectedTrack = track },
+                        onTrackSelected = handleTrackSelected,
                         hazeState = hazeState
                     ) 
                 }
@@ -226,7 +232,7 @@ fun HomeScreen() {
                     MusicSectionRow(
                         title = "Favourites <3", 
                         tracks = favTracks,
-                        onTrackSelected = { track -> selectedTrack = track },
+                        onTrackSelected = handleTrackSelected,
                         hazeState = hazeState
                     ) 
                 }
@@ -248,37 +254,59 @@ fun HomeScreen() {
                 hazeState = hazeState
             )
 
-            if (selectedTrack != null) {
+            if (selectedTrack != null || ampState.currentSong != null) {
                 ModalBottomSheet(
                     onDismissRequest = { selectedTrack = null },
                     sheetState = sheetState,
                     containerColor = Color(0xFF121212)
                 ) {
-                    selectedTrack?.let { track ->
-                        val isTrackLiked = track.id in favTrackIds
-                        MusicPlayer(
-                            title = track.title,
-                            artist = track.artist,
-                            albumArtUrl = track.imageUrl,
-                            isPlaying = isPlaying,
-                            progress = progress,
-                            currentPosText = "1:15",
-                            durtnText = track.duration,
-                            liked = isTrackLiked,
-                            onPlayPauseToggle = { isPlaying = !isPlaying },
-                            onSkipPrevious = { /* TODO */ },
-                            onSkipNext = { /* TODO */ },
-                            onSeek = { progress = it },
-                            onLikeToggle = {
-                                favTrackIds = if (track.id in favTrackIds) {
-                                    favTrackIds - track.id
-                                } else {
-                                    favTrackIds + track.id
-                                }
-                            },
-                            modifier = Modifier.padding(bottom = 24.dp)
-                        )
+                    val currentSong = ampState.currentSong
+                    val title = currentSong?.title ?: selectedTrack?.title ?: ""
+                    val artist = currentSong?.artist ?: selectedTrack?.artist ?: ""
+                    val albumArtUrl = currentSong?.albumArtUri ?: selectedTrack?.imageUrl
+                    val trackId = currentSong?.id?.toString() ?: selectedTrack?.id ?: ""
+
+                    val isTrackLiked = trackId in favTrackIds
+
+                    val curSecs = ampState.progressMs / 1000
+                    val currentPosText = String.format("%d:%02d", curSecs / 60, curSecs % 60)
+
+                    val durSecs = ampState.durationMs / 1000
+                    val durtnText = String.format("%d:%02d", durSecs / 60, durSecs % 60)
+
+                    val progress = if (ampState.durationMs > 0) {
+                        (ampState.progressMs.toFloat() / ampState.durationMs).coerceIn(0f, 1f)
+                    } else {
+                        0f
                     }
+
+                    MusicPlayer(
+                        title = title,
+                        artist = artist,
+                        albumArtUrl = albumArtUrl,
+                        isPlaying = ampState.isPlaying,
+                        progress = progress,
+                        currentPosText = currentPosText,
+                        durtnText = durtnText,
+                        liked = isTrackLiked,
+                        onPlayPauseToggle = { AmpEngine.togglePlayPause() },
+                        onSkipPrevious = { AmpEngine.skipPrevious() },
+                        onSkipNext = { AmpEngine.skipNext() },
+                        onSeek = { newProgressFraction ->
+                            val targetMs = (newProgressFraction * ampState.durationMs).toLong()
+                            AmpEngine.seekTo(targetMs)
+                        },
+                        onLikeToggle = {
+                            if (trackId.isNotEmpty()) {
+                                favTrackIds = if (trackId in favTrackIds) {
+                                    favTrackIds - trackId
+                                } else {
+                                    favTrackIds + trackId
+                                }
+                            }
+                        },
+                        modifier = Modifier.padding(bottom = 24.dp)
+                    )
                 }
             }
         }
