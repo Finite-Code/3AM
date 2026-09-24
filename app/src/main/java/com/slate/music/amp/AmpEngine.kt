@@ -19,9 +19,15 @@ import kotlinx.coroutines.launch
 
 data class AmpState(
     val currentSong: HeartSong? = null,
+    val currentIndex: Int = -1,
     val isPlaying: Boolean = false,
+    val isBuffering: Boolean = false,
     val progressMs: Long = 0L,
-    val durationMs: Long = 0L
+    val durationMs: Long = 0L,
+    val repeatMode: Int = Player.REPEAT_MODE_OFF,
+    val shuffleModeEnabled: Boolean = false,
+    val playbackSpeed: Float = 1.0f,
+    val volume: Float = 1.0f
 )
 
 object AmpEngine {
@@ -86,6 +92,74 @@ object AmpEngine {
         controller?.seekToPreviousMediaItem()
     }
 
+    fun toggleRepeatMode() {
+        val ctrl = controller ?: return
+        val nextMode = when (ctrl.repeatMode) {
+            Player.REPEAT_MODE_OFF -> Player.REPEAT_MODE_ALL
+            Player.REPEAT_MODE_ALL -> Player.REPEAT_MODE_ONE
+            else -> Player.REPEAT_MODE_OFF
+        }
+        ctrl.repeatMode = nextMode
+        _state.value = _state.value.copy(repeatMode = nextMode)
+    }
+
+    fun toggleShuffleMode() {
+        val ctrl = controller ?: return
+        val nextShuffle = !ctrl.shuffleModeEnabled
+        ctrl.shuffleModeEnabled = nextShuffle
+        _state.value = _state.value.copy(shuffleModeEnabled = nextShuffle)
+    }
+
+    fun setPlaybackSpeed(speed: Float) {
+        val ctrl = controller ?: return
+        val validSpeed = speed.coerceIn(0.25f, 2.0f)
+        ctrl.setPlaybackSpeed(validSpeed)
+        _state.value = _state.value.copy(playbackSpeed = validSpeed)
+    }
+
+    fun setVolume(volume: Float) {
+        val ctrl = controller ?: return
+        val validVolume = volume.coerceIn(0.0f, 1.0f)
+        ctrl.volume = validVolume
+        _state.value = _state.value.copy(volume = validVolume)
+    }
+
+    fun addToQueue(song: HeartSong) {
+        val ctrl = controller ?: return
+        playlistSongs = playlistSongs + song
+        val mediaItem = MediaItem.Builder()
+            .setMediaId(song.id.toString())
+            .setUri(song.contentUri)
+            .build()
+        ctrl.addMediaItem(mediaItem)
+    }
+
+    fun playNext(song: HeartSong) {
+        val ctrl = controller ?: return
+        val nextIndex = (ctrl.currentMediaItemIndex + 1).coerceAtMost(playlistSongs.size)
+        playlistSongs = playlistSongs.toMutableList().apply { add(nextIndex, song) }
+        val mediaItem = MediaItem.Builder()
+            .setMediaId(song.id.toString())
+            .setUri(song.contentUri)
+            .build()
+        ctrl.addMediaItem(nextIndex, mediaItem)
+    }
+
+    fun removeQueueItem(index: Int) {
+        val ctrl = controller ?: return
+        if (index in playlistSongs.indices) {
+            playlistSongs = playlistSongs.toMutableList().apply { removeAt(index) }
+            ctrl.removeMediaItem(index)
+        }
+    }
+
+    fun clearQueue() {
+        val ctrl = controller ?: return
+        ctrl.clearMediaItems()
+        playlistSongs = emptyList()
+        _state.value = AmpState()
+    }
+
     private fun setupPlayerListener() {
         controller?.addListener(object : Player.Listener {
             override fun onEvents(player: Player, events: Player.Events) {
@@ -101,9 +175,15 @@ object AmpEngine {
 
         _state.value = AmpState(
             currentSong = currentSong,
+            currentIndex = player.currentMediaItemIndex,
             isPlaying = player.isPlaying,
+            isBuffering = player.playbackState == Player.STATE_BUFFERING,
             progressMs = player.currentPosition.coerceAtLeast(0L),
-            durationMs = player.duration.coerceAtLeast(0L)
+            durationMs = player.duration.coerceAtLeast(0L),
+            repeatMode = player.repeatMode,
+            shuffleModeEnabled = player.shuffleModeEnabled,
+            playbackSpeed = player.playbackParameters.speed,
+            volume = player.volume
         )
     }
 
