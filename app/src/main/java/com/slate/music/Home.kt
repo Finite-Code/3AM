@@ -126,9 +126,11 @@ fun HomeScreen() {
     }
 
     var selectedTrack by remember { mutableStateOf<Track?>(null) }
+    var isPlayerSheetVisible by remember { mutableStateOf(false) }
 
     val handleTrackSelected: (Track) -> Unit = { track ->
         selectedTrack = track
+        isPlayerSheetVisible = true
         val songIndex = songs.indexOfFirst { it.id.toString() == track.id }
         if (songIndex >= 0) {
             AmpEngine.playPlaylist(songs, songIndex)
@@ -254,9 +256,12 @@ fun HomeScreen() {
                 hazeState = hazeState
             )
 
-            if (selectedTrack != null || ampState.currentSong != null) {
+            if (isPlayerSheetVisible && (selectedTrack != null || ampState.currentSong != null)) {
                 ModalBottomSheet(
-                    onDismissRequest = { selectedTrack = null },
+                    onDismissRequest = {
+                        isPlayerSheetVisible = false
+                        selectedTrack = null
+                    },
                     sheetState = sheetState,
                     containerColor = Color(0xFF121212)
                 ) {
