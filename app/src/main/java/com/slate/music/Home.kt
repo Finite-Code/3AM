@@ -66,6 +66,8 @@ fun HomeScreen() {
     val hazeState = remember { HazeState() }
     val scrollState = rememberLazyListState()
 
+    val isBlurEnabled by AppSettings.isBlurEnabled.collectAsState()
+
     DeadEndHapticHandler(scrollState)
 
     var selectedTab by remember { mutableStateOf(0) }
@@ -210,11 +212,11 @@ fun HomeScreen() {
                     .hazeBlur(
                         input = HazeInput.Sources(state = hazeState),
                         style = HazeBlurStyle {
-                            blurRadius(24.dp)
+                            blurRadius(if (isBlurEnabled) 24.dp else 0.dp)
                             noiseFactor(0f)
                             progressive(
                                 HazeProgressive.verticalGradient(
-                                    startIntensity = 0.90f,
+                                    startIntensity = if (isBlurEnabled) 0.90f else 0f,
                                     endIntensity = 0.0f
                                 )
                             )
@@ -370,10 +372,11 @@ fun MiniPlayer(
     val outerShape = RoundedCornerShape(18.dp)
     val innerAlbumArtShape = RoundedCornerShape(10.dp)
 
+    val isBlurEnabled by AppSettings.isBlurEnabled.collectAsState()
+
     Surface(
         shape = outerShape,
-        color = Color(0xFF1E1E1E).copy(alpha = 0.85f),
-        // border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)), Removed the border, looks ugly
+        color = Color(0xFF1E1E1E).copy(alpha = if (isBlurEnabled) 0.85f else 0.98f),
         modifier = modifier
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .fillMaxWidth()
@@ -382,7 +385,7 @@ fun MiniPlayer(
             .hazeBlur(
                 input = HazeInput.Sources(state = hazeState),
                 style = HazeBlurStyle {
-                    blurRadius(24.dp)
+                    blurRadius(if (isBlurEnabled) 24.dp else 0.dp)
                     noiseFactor(0f)
                 }
             )

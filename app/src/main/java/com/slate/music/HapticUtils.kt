@@ -13,6 +13,8 @@ import androidx.compose.ui.platform.LocalContext
  * Triggers a predefined haptic effect on Android 13+ devices.
  */
 fun Context.performHaptic(effectId: Int = VibrationEffect.EFFECT_TICK) {
+    if(!AppSettings.isHapticsEnabled.value) return
+
     try {
         val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
         vibratorManager.defaultVibrator.vibrate(VibrationEffect.createPredefined(effectId))

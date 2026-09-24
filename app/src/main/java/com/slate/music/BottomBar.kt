@@ -1,19 +1,20 @@
 package com.slate.music
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
-import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.hazeBlur
 
@@ -25,6 +26,8 @@ fun BottomBar(
     hazeState: HazeState,
     modifier: Modifier = Modifier
 ) {
+    val isBlurEnabled by AppSettings.isBlurEnabled.collectAsState()
+
     Row(
         modifier = modifier
             .navigationBarsPadding()
@@ -35,13 +38,13 @@ fun BottomBar(
     ) {
         Surface(
             shape = CircleShape,
-            color = Color(0xFF1E1E1E).copy(alpha = 0.16f),
+            color = Color(0xFF1E1E1E).copy(alpha = if (isBlurEnabled) 0.16f else 0.92f),
             modifier = Modifier
                 .clip(CircleShape)
                 .hazeBlur(
                     input = HazeInput.Sources(state = hazeState),
                     style = HazeBlurStyle {
-                        blurRadius(24.dp)
+                        blurRadius(if (isBlurEnabled) 24.dp else 0.dp)
                         noiseFactor(0f)
                     }
                 )
@@ -52,7 +55,7 @@ fun BottomBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                IconButton(onClick = {onTabSelected(0)}) {
+                IconButton(onClick = { onTabSelected(0) }) {
                     Icon(
                         imageVector = Icons.Rounded.Home,
                         contentDescription = "Home",
@@ -60,7 +63,7 @@ fun BottomBar(
                     )
                 }
 
-                IconButton(onClick = {onTabSelected(1)}) {
+                IconButton(onClick = { onTabSelected(1) }) {
                     Icon(
                         imageVector = Icons.Rounded.MusicNote,
                         contentDescription = "Library",
@@ -68,7 +71,7 @@ fun BottomBar(
                     )
                 }
 
-                IconButton(onClick = {onTabSelected(2)}) {
+                IconButton(onClick = { onTabSelected(2) }) {
                     Icon(
                         imageVector = Icons.Rounded.Settings,
                         contentDescription = "Settings",
@@ -80,7 +83,7 @@ fun BottomBar(
 
         Surface(
             shape = CircleShape,
-            color = Color(0xFF1E1E1E).copy(alpha = 0.16f),
+            color = Color(0xFF1E1E1E).copy(alpha = if (isBlurEnabled) 0.16f else 0.92f),
             shadowElevation = 8.dp,
             modifier = Modifier
                 .size(52.dp)
@@ -88,7 +91,7 @@ fun BottomBar(
                 .hazeBlur(
                     input = HazeInput.Sources(state = hazeState),
                     style = HazeBlurStyle {
-                        blurRadius(24.dp)
+                        blurRadius(if (isBlurEnabled) 24.dp else 0.dp)
                         noiseFactor(0f)
                     }
                 )

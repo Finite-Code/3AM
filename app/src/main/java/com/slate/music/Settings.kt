@@ -28,6 +28,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.CancellationException
 
 @Composable
@@ -64,6 +65,10 @@ fun SettingsScreen(
         dampingRatio = Spring.DampingRatioLowBouncy,
         stiffness = Spring.StiffnessLow
     )
+
+    val context = LocalContext.current
+    val isBlurEnabled by AppSettings.isBlurEnabled.collectAsState()
+    val isHapticsEnabled by AppSettings.isHapticsEnabled.collectAsState()
 
     AnimatedVisibility(
         visible = isVisible,
@@ -190,8 +195,8 @@ fun SettingsScreen(
                         icon = Icons.Rounded.BlurOn,
                         title = "Glassmorphic Blur",
                         subtitle = "Enable real-time ambient blur effects",
-                        checked = darkGlass,
-                        onCheckedChange = { darkGlass = it }
+                        checked = isBlurEnabled,
+                        onCheckedChange = { AppSettings.setBlurEnabled(context, it) }
                     )
                 }
 
@@ -200,8 +205,8 @@ fun SettingsScreen(
                         icon = Icons.Rounded.Vibration,
                         title = "Haptic Feedback",
                         subtitle = "Enable or disable haptic feedback",
-                        checked = hapticFeedback,
-                        onCheckedChange = { hapticFeedback = it }
+                        checked = isHapticsEnabled,
+                        onCheckedChange = {AppSettings.setHapticsEnabled(context, it) }
                     )
                 }
 

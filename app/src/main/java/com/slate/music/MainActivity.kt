@@ -43,6 +43,8 @@ import com.slate.music.amp.*
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
+        AppSettings.initialize(this)
+
         AmpEngine.initialize(this)
 
         super.onCreate(savedInstanceState)
