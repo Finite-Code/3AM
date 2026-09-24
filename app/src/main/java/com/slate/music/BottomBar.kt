@@ -38,7 +38,8 @@ fun BottomBar(
     ) {
         Surface(
             shape = CircleShape,
-            color = Color(0xFF1E1E1E).copy(alpha = if (isBlurEnabled) 0.16f else 0.92f),
+            // fallback bg if blur is disabled
+            color = if (isBlurEnabled) Color(0xFF1E1E1E).copy(alpha = 0.16f) else Color(0xFF1E1E1E),
             modifier = Modifier
                 .clip(CircleShape)
                 .hazeBlur(
@@ -55,36 +56,29 @@ fun BottomBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                IconButton(onClick = { onTabSelected(0) }) {
-                    Icon(
-                        imageVector = Icons.Rounded.Home,
-                        contentDescription = "home sweet home",
-                        tint = if (selectedTab == 0) Color.White else Color.LightGray
-                    )
-                }
+                // tabs
+                val tabs = listOf(
+                    Icons.Rounded.Home to "home sweet home",
+                    Icons.Rounded.MusicNote to "library stuff",
+                    Icons.Rounded.Settings to "settings"
+                )
 
-                IconButton(onClick = { onTabSelected(1) }) {
-                    Icon(
-                        imageVector = Icons.Rounded.MusicNote,
-                        contentDescription = "library stuff",
-                        tint = if (selectedTab == 1) Color.White else Color.LightGray
-                    )
-                }
-
-                IconButton(onClick = { onTabSelected(2) }) {
-                    Icon(
-                        imageVector = Icons.Rounded.Settings,
-                        contentDescription = "settings",
-                        tint = if (selectedTab == 2) Color.White else Color.LightGray
-                    )
+                tabs.forEachIndexed { i, (icon, desc) ->
+                    IconButton(onClick = { onTabSelected(i) }) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = desc,
+                            tint = if (selectedTab == i) Color.White else Color.LightGray
+                        )
+                    }
                 }
             }
         }
 
         Surface(
             shape = CircleShape,
-            color = Color(0xFF1E1E1E).copy(alpha = if (isBlurEnabled) 0.16f else 0.92f),
-            shadowElevation = 8.dp,
+            // fallback bg if blur is disabled
+            color = if (isBlurEnabled) Color(0xFF1E1E1E).copy(alpha = 0.16f) else Color(0xFF1E1E1E),            shadowElevation = 8.dp,
             modifier = Modifier
                 .size(52.dp)
                 .clip(CircleShape)

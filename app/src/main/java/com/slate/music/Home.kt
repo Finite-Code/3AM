@@ -376,8 +376,7 @@ fun MiniPlayer(
 
     Surface(
         shape = outerShape,
-        color = Color(0xFF1E1E1E).copy(alpha = if (isBlurEnabled) 0.85f else 0.98f),
-        modifier = modifier
+        color = if (isBlurEnabled) Color(0xFF1E1E1E).copy(alpha = 0.85f) else Color(0xFF1E1E1E),        modifier = modifier
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .fillMaxWidth()
             .clip(outerShape)
