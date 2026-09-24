@@ -38,7 +38,7 @@ fun BottomBar(
     ) {
         Surface(
             shape = CircleShape,
-            color = Color(0xFF1E1E1E).copy(alpha = if (isBlurEnabled) 0.16f else 0.92f),
+            color = if (isBlurEnabled) Color(0xFF1E1E1E).copy(alpha = 0.16f) else Color(0xFF1E1E1E),
             modifier = Modifier
                 .clip(CircleShape)
                 .hazeBlur(
@@ -83,8 +83,7 @@ fun BottomBar(
 
         Surface(
             shape = CircleShape,
-            color = Color(0xFF1E1E1E).copy(alpha = if (isBlurEnabled) 0.16f else 0.92f),
-            shadowElevation = 8.dp,
+            color = if (isBlurEnabled) Color(0xFF1E1E1E).copy(alpha = 0.16f) else Color(0xFF1E1E1E),            shadowElevation = 8.dp,
             modifier = Modifier
                 .size(52.dp)
                 .clip(CircleShape)
