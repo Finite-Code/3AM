@@ -165,97 +165,93 @@ fun HomeScreen() {
         ) {
             LazyColumn(
                 state = scrollState,
-                modifier = Modifier.fillMaxSize().hazeSource(state = hazeState),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .hazeSource(state = hazeState),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 90.dp)
+                contentPadding = PaddingValues(
+                    top = headerMaxHeight,
+                    bottom = 120.dp
+                )
             ) {
                 item {
-                    val spacerHeight = (headerMaxHeight - stickyHeaderHeight).coerceAtLeast(0.dp)
-                    Spacer(modifier = Modifier.height(spacerHeight))
+                    MusicSectionRow(
+                        title = "Top Played",
+                        tracks = displayTracks,
+                        onTrackSelected = handleTrackSelected
+                    )
                 }
 
-                stickyHeader {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(stickyHeaderHeight)
-                            .hazeBlur(
-                                input = HazeInput.Sources(state = hazeState),
-                                style = HazeBlurStyle {
-                                    blurRadius(24.dp)
-                                    noiseFactor(0f)
-                                    progressive(
-                                        HazeProgressive.verticalGradient(
-                                            startIntensity = (0.48f * collapseFraction),
-                                            endIntensity = (0.001f * collapseFraction)
-                                        )
-                                    )
-                                }
-                            )
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Black.copy(alpha = 2f * collapseFraction),
-                                        Color.Black.copy(alpha = 0.030f * collapseFraction)
-                                    )
+                item {
+                    MusicSectionRow(
+                        title = "Your Top Artists",
+                        tracks = displayTracks,
+                        onTrackSelected = handleTrackSelected
+                    )
+                }
+
+                item {
+                    MusicSectionRow(
+                        title = "Favourites <3",
+                        tracks = favTracks,
+                        onTrackSelected = handleTrackSelected
+                    )
+                }
+
+                item { Spacer(modifier = Modifier.height(100.dp)) }
+            }
+
+            val currentHeaderHeight = headerMaxHeight - ((headerMaxHeight - stickyHeaderHeight) * collapseFraction)
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(currentHeaderHeight)
+                    .hazeBlur(
+                        input = HazeInput.Sources(state = hazeState),
+                        style = HazeBlurStyle {
+                            blurRadius(24.dp)
+                            noiseFactor(0f)
+                            progressive(
+                                HazeProgressive.verticalGradient(
+                                    startIntensity = 0.90f,
+                                    endIntensity = 0.0f
                                 )
                             )
-                    ) {
-                        Box(modifier = Modifier.statusBarsPadding().fillMaxSize()) {
-                            val fontSize = (148 - ((148 - 108) * snappedFraction)).sp
-                            val yOffset = ((-16) * (1 - snappedFraction)).dp
-
-                            Text(
-                                text = "3AM",
-                                style = MaterialTheme.typography.displayLarge.copy(
-                                    fontWeight = FontWeight.ExtraBold,
-                                    letterSpacing = 2.sp,
-                                    brush = brushedSteelBrush,
-                                    shadow = Shadow(
-                                        color = Color.Black.copy(alpha = 0.6f),
-                                        offset = Offset(0f, 4f),
-                                        blurRadius = 6f
-                                    )
-                                ),
-                                fontSize = fontSize,
-                                modifier = Modifier
-                                    .align(Alignment.BottomStart)
-                                    .padding(start = 24.dp, bottom = 20.dp)
-                                    .offset(y = yOffset)
-                            )
                         }
-                    }
-                }
+                    )
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Black.copy(alpha = (0.80f * collapseFraction + 0.25f).coerceIn(0f, 1f)),
+                                Color.Black.copy(alpha = (0.30f * collapseFraction).coerceIn(0f, 1f)),
+                                Color.Transparent
+                            )
+                        )
+                    )
+                    .align(Alignment.TopCenter)
+            ) {
+                Box(modifier = Modifier.statusBarsPadding().fillMaxSize()) {
+                    val fontSize = (148 - ((148 - 108) * snappedFraction)).sp
 
-                // Use hazeSource specifically on each card or section
-                item { 
-                    MusicSectionRow(
-                        title = "Top Played", 
-                        tracks = displayTracks, 
-                        onTrackSelected = handleTrackSelected,
-                        hazeState = hazeState
-                    ) 
+                    Text(
+                        text = "3AM",
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 2.sp,
+                            brush = brushedSteelBrush,
+                            shadow = Shadow(
+                                color = Color.Black.copy(alpha = 0.6f),
+                                offset = Offset(0f, 4f),
+                                blurRadius = 6f
+                            )
+                        ),
+                        fontSize = fontSize,
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(start = 24.dp, bottom = 12.dp)
+                    )
                 }
-                
-                item { 
-                    MusicSectionRow(
-                        title = "Your Top Artists", 
-                        tracks = displayTracks, 
-                        onTrackSelected = handleTrackSelected,
-                        hazeState = hazeState
-                    ) 
-                }
-                
-                item { 
-                    MusicSectionRow(
-                        title = "Favourites <3", 
-                        tracks = favTracks,
-                        onTrackSelected = handleTrackSelected,
-                        hazeState = hazeState
-                    ) 
-                }
-                
-                item { Spacer(modifier = Modifier.height(100.dp)) }
             }
 
             Column(
@@ -474,13 +470,11 @@ fun MiniPlayer(
 fun MusicSectionRow(
     title: String,
     tracks: List<Track>,
-    onTrackSelected: (Track) -> Unit,
-    hazeState: HazeState
+    onTrackSelected: (Track) -> Unit
 ) {
     Column(
         modifier = Modifier
             .padding(top = 16.dp)
-            .hazeSource(state = hazeState)
     ) {
         Text(
             text = title,
