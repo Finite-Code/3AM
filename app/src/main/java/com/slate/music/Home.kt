@@ -42,6 +42,7 @@ import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.hazeBlur
 import dev.chrisbanes.haze.hazeSource
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
@@ -354,57 +355,6 @@ fun HomeScreen() {
 
 
 @Composable
-fun MusicSectionRow(
-    title: String,
-    tracks: List<Track>,
-    onTrackSelected: (Track) -> Unit,
-    hazeState: HazeState
-) {
-    Column(
-        modifier = Modifier
-                    .padding(top = 16.dp)
-                    .hazeSource(state = hazeState)
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
-            fontSize = 32.sp,
-            color = Color.White,
-            modifier = Modifier
-                .padding(start = 16.dp, bottom = 12.dp)
-        )
-
-        if (tracks.isEmpty()) {
-            Text(
-                text = "No tracks added yet :(" +
-                        "\nwon't ya' hit some music?",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.DarkGray,
-                modifier = Modifier.padding(start = 16.dp, bottom = 12.dp)
-            )
-        } else {
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(tracks, key = { it.id }) { track ->
-                    SquareMusicCard(
-                        track = track,
-                        onClick = { onTrackSelected(track) },
-                        modifier = Modifier.width(176.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-
-/* === MINI Player === */
-
-@Composable
 fun MiniPlayer(
     song: HeartSong?,
     isPlaying: Boolean,
@@ -415,47 +365,53 @@ fun MiniPlayer(
     hazeState: HazeState,
     modifier: Modifier = Modifier
 ) {
-    if (song ==null) return
+    if (song == null) return
 
     val progressFraction = if (durationMs > 0) {
         (progressMs.toFloat() / durationMs).coerceIn(0f, 1f)
-    } else {
-        0f
-    }
+    } else 0f
+
+    val outerShape = RoundedCornerShape(18.dp)
+    val innerAlbumArtShape = RoundedCornerShape(10.dp)
 
     Surface(
-        shape = RoundedCornerShape(20.dp),
-        color = Color(0xFF181818).copy(alpha = 0.85f),
-        border  = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)), // The perfect signature amnt of white lol. love you Dad xD. shoutout to him :)
+        shape = outerShape,
+        color = Color(0xFF1E1E1E).copy(alpha = 0.85f),
+        // border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)), Removed the border, looks ugly
         modifier = modifier
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .fillMaxWidth()
+            .clip(outerShape)
             .clickable(onClick = onClick)
-            .hazeBlur(input = HazeInput.Sources(state = hazeState),
-                style = HazeBlurStyle{
+            .hazeBlur(
+                input = HazeInput.Sources(state = hazeState),
+                style = HazeBlurStyle {
                     blurRadius(24.dp)
                     noiseFactor(0f)
-                // TODO:    progressive(HazeProgressive.verticalGradient()) Make it progressive perhaps? might look bad tho
-                })
+                }
+            )
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Box( modifier = Modifier
-                    .size(42.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFF282828))
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(innerAlbumArtShape)
+                        .background(Color(0xFF282828))
                 ) {
-                    if(!song.albumArtUri.isNullOrEmpty()){
+                    if (!song.albumArtUri.isNullOrEmpty()) {
                         AsyncImage(
                             model = song.albumArtUri,
                             contentDescription = "Easter Egg duhh",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
-                    } else{
+                    } else {
                         Icon(
                             imageVector = Icons.Rounded.MusicNote,
                             contentDescription = null,
@@ -469,7 +425,7 @@ fun MiniPlayer(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Column(modifier = Modifier.weight(1f)){
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = song.title,
                         style = MaterialTheme.typography.titleMedium,
@@ -503,11 +459,60 @@ fun MiniPlayer(
             }
 
             LinearProgressIndicator(
-                progress = { progressFraction},
-                modifier = Modifier.fillMaxWidth().height(2.dp),
+                progress = { progressFraction },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.dp),
                 trackColor = Color.White.copy(alpha = 0.15f),
                 color = Color.White
             )
+        }
+    }
+}
+
+@Composable
+fun MusicSectionRow(
+    title: String,
+    tracks: List<Track>,
+    onTrackSelected: (Track) -> Unit,
+    hazeState: HazeState
+) {
+    Column(
+        modifier = Modifier
+            .padding(top = 16.dp)
+            .hazeSource(state = hazeState)
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            fontSize = 32.sp,
+            color = Color.White,
+            modifier = Modifier
+                .padding(start = 16.dp, bottom = 12.dp)
+        )
+
+        if (tracks.isEmpty()) {
+            Text(
+                text = "No tracks added yet :(\nwon't ya' hit some music?",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.DarkGray,
+                modifier = Modifier.padding(start = 16.dp, bottom = 12.dp)
+            )
+        } else {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(tracks, key = { it.id }) { track ->
+                    SquareMusicCard(
+                        track = track,
+                        onClick = { onTrackSelected(track) },
+                        modifier = Modifier.width(176.dp)
+                    )
+                }
+            }
         }
     }
 }
