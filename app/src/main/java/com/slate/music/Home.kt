@@ -275,14 +275,14 @@ fun HomeScreen() {
                         hazeState = hazeState
                     )
                 }
-            }
 
-            BottomBar(
-                selectedTab = selectedTab,
-                onTabSelected = { selectedTab = it },
-                onSearchClick = { /* TODO: Start Search Action */ },
-                hazeState = hazeState
-            )
+                BottomBar(
+                    selectedTab = selectedTab,
+                    onTabSelected = { selectedTab = it },
+                    onSearchClick = { /* TODO: Start Search Action */ },
+                    hazeState = hazeState
+                )
+            }
 
             SettingsScreen(
                 isVisible = selectedTab == 2,
