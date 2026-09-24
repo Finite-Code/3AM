@@ -2,38 +2,53 @@
 
 package com.slate.music
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.foundation.lazy.*
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.chrisbanes.haze.HazeState
+import com.slate.music.Heart.HeartEngine
+import com.slate.music.Heart.HeartSong
+import com.slate.music.amp.AmpEngine
 import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.blur.hazeBlur
+import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.blur.HazeBlurStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.lazy.*
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.ui.platform.LocalContext
-import com.slate.music.Heart.HeartEngine
-import com.slate.music.amp.AmpEngine
+import dev.chrisbanes.haze.blur.hazeBlur
+import dev.chrisbanes.haze.hazeSource
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.Pause
+import androidx.compose.material.icons.rounded.PlayArrow
+import coil.compose.AsyncImage
 
 data class Track(
     val id: String,
@@ -242,12 +257,31 @@ fun HomeScreen() {
                 item { Spacer(modifier = Modifier.height(100.dp)) }
             }
 
+            Column(
+                modifier = Modifier.align(Alignment.BottomCenter)
+            ) {
+                AnimatedVisibility(
+                    visible = ampState.currentSong != null && !isPlayerSheetVisible,
+                    enter = slideInVertically { it} + fadeIn(),
+                    exit = slideOutVertically { it } + fadeOut()
+                ) {
+                    MiniPlayer(
+                        song = ampState.currentSong,
+                        isPlaying = ampState.isPlaying,
+                        progressMs = ampState.progressMs,
+                        durationMs = ampState.durationMs,
+                        onPlayPauseToggle = { AmpEngine.togglePlayPause() },
+                        onClick = { isPlayerSheetVisible = true },
+                        hazeState = hazeState
+                    )
+                }
+            }
+
             BottomBar(
                 selectedTab = selectedTab,
                 onTabSelected = { selectedTab = it },
                 onSearchClick = { /* TODO: Start Search Action */ },
-                hazeState = hazeState,
-                modifier = Modifier.align(Alignment.BottomCenter)
+                hazeState = hazeState
             )
 
             SettingsScreen(
@@ -363,6 +397,117 @@ fun MusicSectionRow(
                     )
                 }
             }
+        }
+    }
+}
+
+
+/* === MINI Player === */
+
+@Composable
+fun MiniPlayer(
+    song: HeartSong?,
+    isPlaying: Boolean,
+    progressMs: Long,
+    durationMs: Long,
+    onPlayPauseToggle: () -> Unit,
+    onClick: () -> Unit,
+    hazeState: HazeState,
+    modifier: Modifier = Modifier
+) {
+    if (song ==null) return
+
+    val progressFraction = if (durationMs > 0) {
+        (progressMs.toFloat() / durationMs).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
+
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = Color(0xFF181818).copy(alpha = 0.85f),
+        border  = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)), // The perfect signature amnt of white lol. love you Dad xD. shoutout to him :)
+        modifier = modifier
+            .clickable(onClick = onClick)
+            .hazeBlur(input = HazeInput.Sources(state = hazeState),
+                style = HazeBlurStyle{
+                    blurRadius(24.dp)
+                    noiseFactor(0f)
+                // TODO:    progressive(HazeProgressive.verticalGradient()) Make it progressive perhaps? might look bad tho
+                })
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box( modifier = Modifier
+                    .size(42.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFF282828))
+                ) {
+                    if(!song.albumArtUri.isNullOrEmpty()){
+                        AsyncImage(
+                            model = song.albumArtUri,
+                            contentDescription = "Easter Egg duhh",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else{
+                        Icon(
+                            imageVector = Icons.Rounded.MusicNote,
+                            contentDescription = null,
+                            tint = Color.Gray,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .align(Alignment.Center)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(modifier = Modifier.weight(1f)){
+                    Text(
+                        text = song.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontSize = 15.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = song.artist,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.LightGray,
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                IconButton(
+                    onClick = onPlayPauseToggle,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            LinearProgressIndicator(
+                progress = { progressFraction},
+                modifier = Modifier.fillMaxWidth().height(2.dp),
+                trackColor = Color.White.copy(alpha = 0.15f),
+                color = Color.White
+            )
         }
     }
 }
