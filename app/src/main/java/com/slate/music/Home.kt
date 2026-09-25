@@ -165,94 +165,98 @@ fun HomeScreen() {
                 .fillMaxSize()
                 .padding(bottom = scaffoldPadding.calculateBottomPadding())
         ) {
-            LazyColumn(
-                state = scrollState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .hazeSource(state = hazeState),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(
-                    top = headerMaxHeight,
-                    bottom = 120.dp
-                )
-            ) {
-                item {
-                    MusicSectionRow(
-                        title = "Top Played",
-                        tracks = displayTracks,
-                        onTrackSelected = handleTrackSelected
+            if (selectedTab == 1) {
+                LibraryScreen(hazeState = hazeState)
+            } else {
+                LazyColumn(
+                    state = scrollState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .hazeSource(state = hazeState),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(
+                        top = headerMaxHeight,
+                        bottom = 120.dp
                     )
+                ) {
+                    item {
+                        MusicSectionRow(
+                            title = "Top Played",
+                            tracks = displayTracks,
+                            onTrackSelected = handleTrackSelected
+                        )
+                    }
+
+                    item {
+                        MusicSectionRow(
+                            title = "Your Top Artists",
+                            tracks = displayTracks,
+                            onTrackSelected = handleTrackSelected
+                        )
+                    }
+
+                    item {
+                        MusicSectionRow(
+                            title = "Favourites <3",
+                            tracks = favTracks,
+                            onTrackSelected = handleTrackSelected
+                        )
+                    }
+
+                    item { Spacer(modifier = Modifier.height(100.dp)) }
                 }
 
-                item {
-                    MusicSectionRow(
-                        title = "Your Top Artists",
-                        tracks = displayTracks,
-                        onTrackSelected = handleTrackSelected
-                    )
-                }
+                val currentHeaderHeight = headerMaxHeight - ((headerMaxHeight - stickyHeaderHeight) * collapseFraction)
 
-                item {
-                    MusicSectionRow(
-                        title = "Favourites <3",
-                        tracks = favTracks,
-                        onTrackSelected = handleTrackSelected
-                    )
-                }
-
-                item { Spacer(modifier = Modifier.height(100.dp)) }
-            }
-
-            val currentHeaderHeight = headerMaxHeight - ((headerMaxHeight - stickyHeaderHeight) * collapseFraction)
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(currentHeaderHeight)
-                    .hazeBlur(
-                        input = HazeInput.Sources(state = hazeState),
-                        style = HazeBlurStyle {
-                            blurRadius(if (isBlurEnabled) 24.dp else 0.dp)
-                            noiseFactor(0f)
-                            progressive(
-                                HazeProgressive.verticalGradient(
-                                    startIntensity = if (isBlurEnabled) 0.90f else 0f,
-                                    endIntensity = 0.0f
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(currentHeaderHeight)
+                        .hazeBlur(
+                            input = HazeInput.Sources(state = hazeState),
+                            style = HazeBlurStyle {
+                                blurRadius(if (isBlurEnabled) 24.dp else 0.dp)
+                                noiseFactor(0f)
+                                progressive(
+                                    HazeProgressive.verticalGradient(
+                                        startIntensity = if (isBlurEnabled) 0.90f else 0f,
+                                        endIntensity = 0.0f
+                                    )
+                                )
+                            }
+                        )
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Black.copy(alpha = (0.80f * collapseFraction + 0.25f).coerceIn(0f, 1f)),
+                                    Color.Black.copy(alpha = (0.30f * collapseFraction).coerceIn(0f, 1f)),
+                                    Color.Transparent
                                 )
                             )
-                        }
-                    )
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Black.copy(alpha = (0.80f * collapseFraction + 0.25f).coerceIn(0f, 1f)),
-                                Color.Black.copy(alpha = (0.30f * collapseFraction).coerceIn(0f, 1f)),
-                                Color.Transparent
-                            )
                         )
-                    )
-                    .align(Alignment.TopCenter)
-            ) {
-                Box(modifier = Modifier.statusBarsPadding().fillMaxSize()) {
-                    val fontSize = (148 - ((148 - 108) * snappedFraction)).sp
+                        .align(Alignment.TopCenter)
+                ) {
+                    Box(modifier = Modifier.statusBarsPadding().fillMaxSize()) {
+                        val fontSize = (148 - ((148 - 108) * snappedFraction)).sp
 
-                    Text(
-                        text = "3AM",
-                        style = MaterialTheme.typography.displayLarge.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 2.sp,
-                            brush = brushedSteelBrush,
-                            shadow = Shadow(
-                                color = Color.Black.copy(alpha = 0.6f),
-                                offset = Offset(0f, 4f),
-                                blurRadius = 6f
-                            )
-                        ),
-                        fontSize = fontSize,
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(start = 24.dp, bottom = 12.dp)
-                    )
+                        Text(
+                            text = "3AM",
+                            style = MaterialTheme.typography.displayLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 2.sp,
+                                brush = brushedSteelBrush,
+                                shadow = Shadow(
+                                    color = Color.Black.copy(alpha = 0.6f),
+                                    offset = Offset(0f, 4f),
+                                    blurRadius = 6f
+                                )
+                            ),
+                            fontSize = fontSize,
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(start = 24.dp, bottom = 12.dp)
+                        )
+                    }
                 }
             }
 
