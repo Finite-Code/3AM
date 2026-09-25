@@ -83,18 +83,19 @@ fun SquareMusicCard(
                     .padding(18.dp)
             ) {
                 Text(
-                    text = track.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontSize = 18.sp,
+                    text = track.title.lowercase(),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Black,
+                        fontSize = 16.sp
+                    ),
                     color = Color.White,
-                    fontWeight = FontWeight.Bold,
                     maxLines = 1,
+                    letterSpacing = (-1.0).sp,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = track.artist,
-                    style = MaterialTheme.typography.bodySmall,
-                    fontSize = 13.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = Color.LightGray,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
