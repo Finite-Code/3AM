@@ -194,7 +194,7 @@ fun ListeningStatsScreen(
                                     )
                                     Spacer(modifier = Modifier.width(10.dp))
                                     Text(
-                                        text = "3AM Night Sessions",
+                                        text = "3AM Sessions",
                                         color = Color.White,
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight.Bold
