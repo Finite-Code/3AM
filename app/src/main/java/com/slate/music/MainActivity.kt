@@ -47,6 +47,8 @@ class MainActivity : ComponentActivity() {
 
         AmpEngine.initialize(this)
 
+        ListeningStatsManager.initialize(this)
+
         super.onCreate(savedInstanceState)
         setContent {
             val context = LocalContext.current
