@@ -281,7 +281,7 @@ fun ListeningStatsScreen(
                             ) {
                                 Text("00:00", color = Color.Gray, fontSize = 11.sp)
                                 Text(
-                                    "03:00 (Peak)",
+                                    "3AM (Peak)",
                                     color = Color(0xFFEFB4E0),
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold
