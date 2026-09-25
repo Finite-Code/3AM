@@ -184,6 +184,10 @@ fun SettingsScreen(
                     )
                 }
 
+                item {
+                    com.slate.music.amp.EqualizerControlCard(hazeState = hazeState)
+                }
+
                 /* SECTION 2: Haptics & Visuals */
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
