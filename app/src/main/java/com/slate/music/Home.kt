@@ -43,6 +43,8 @@ import dev.chrisbanes.haze.blur.hazeBlur
 import dev.chrisbanes.haze.hazeSource
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
@@ -151,6 +153,8 @@ fun HomeScreen() {
         isPlayerSheetVisible = true
         val songIndex = songs.indexOfFirst { it.id.toString() == track.id }
         if (songIndex >= 0) {
+            val selectedSong = songs[songIndex]
+            ListeningStatsManager.recordTrackPlay(context, selectedSong)
             AmpEngine.playPlaylist(songs, songIndex)
         }
     }
@@ -158,6 +162,7 @@ fun HomeScreen() {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var isSearchOpen by remember { mutableStateOf(false) }
+    var isStatsOpen by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = Color.Black
@@ -166,6 +171,14 @@ fun HomeScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = scaffoldPadding.calculateBottomPadding())
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures { _, dragAmount ->
+                        if (dragAmount > 40f && !isStatsOpen && !isSearchOpen && !isPlayerSheetVisible) {
+                            context.performHapticClick()
+                            isStatsOpen = true
+                        }
+                    }
+                }
         ) {
             if (selectedTab == 1) {
                 LibraryScreen(hazeState = hazeState)
@@ -301,6 +314,12 @@ fun HomeScreen() {
             SearchScreen(
                 isVisible = isSearchOpen,
                 onClose = { isSearchOpen = false },
+                hazeState = hazeState
+            )
+
+            ListeningStatsScreen(
+                isVisible = isStatsOpen,
+                onClose = { isStatsOpen = false },
                 hazeState = hazeState
             )
 
