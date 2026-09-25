@@ -82,7 +82,7 @@ fun ListeningStatsScreen(
 
         DeadEndHapticHandler(scrollState)
 
-        \n        val todayHours = statsState.todayListeningTimeMs / 1000 / 3600
+        \n        \n        val todayHours = statsState.todayListeningTimeMs / 1000 / 3600
         val todayMins = (statsState.todayListeningTimeMs / 1000 % 3600) / 60
 
         val weeklyHours = statsState.weeklyListeningTimeMs / 1000 / 3600

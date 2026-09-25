@@ -8,6 +8,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.MoreExecutors
 import com.slate.music.Heart.HeartSong
+import com.slate.music.ListeningStatsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -40,8 +41,11 @@ object AmpEngine {
 
     private var playlistSongs: List<HeartSong> = emptyList()
 
+    private var appContext: Context? = null
+
     fun initialize(context: Context) {
         if (controller != null) return
+        appContext = context.applicationContext
 
         val sessionToken = SessionToken(
             context.applicationContext,
@@ -171,6 +175,16 @@ object AmpEngine {
 
     private fun updateState(player: Player) {
         val currentMediaId = player.currentMediaItem?.mediaId
+        val previousSong = _state.value.currentSong
+        val previousProgress = _state.value.progressMs
+
+        // fixup!: When active track changes, log the previous track's actual listened duration
+        if (previousSong != null && previousSong.id.toString() != currentMediaId && previousProgress > 3000L) {
+            appContext?.let { ctx ->
+                ListeningStatsManager.recordTrackPlay(ctx, previousSong, actualPlayedMs = previousProgress)
+            }
+        }
+
         val currentSong = playlistSongs.find { it.id.toString() == currentMediaId }
 
         _state.value = AmpState(

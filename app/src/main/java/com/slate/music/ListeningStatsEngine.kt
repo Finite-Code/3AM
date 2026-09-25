@@ -52,10 +52,15 @@ object ListeningStatsManager {
             hourlyMap[h] = prefs.getInt("hour_$h", if (h == 3) 14 else (1..8).random())
         }
 
+        // Load real recorded hourly play counts from SharedPreferences
+        for (h in 0..23) {
+            hourlyMap[h] = prefs.getInt("hour_$h", 0)
+        }
+
         refreshState(todayMs, weeklyMs)
     }
 
-    fun recordTrackPlay(context: Context, song: HeartSong) {
+    fun recordTrackPlay(context: Context, song: HeartSong, actualPlayedMs: Long = 0L) {
         val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         val hourCount = (hourlyMap[currentHour] ?: 0) + 1
         hourlyMap[currentHour] = hourCount
@@ -65,6 +70,16 @@ object ListeningStatsManager {
 
         val currentArtistCount = (artistCounts[song.artist] ?: 0) + 1
         artistCounts[song.artist] = currentArtistCount
+
+        // fixup!: Log actual listened time instead of assuming the user listened to the entire "x" minute song
+        val timeToAddMs = if (actualPlayedMs > 0L) {
+            actualPlayedMs.coerceAtMost(song.durationMs)
+        } else {
+            song.durationMs
+        }
+
+        // Also ignore any short term playback as "listened to time". since ppl don't listen to songs for 10s only!
+        if (timeToAddMs < 10000L) return
 
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val newTodayMs = prefs.getLong(KEY_TODAY_TIME, 0L) + song.durationMs

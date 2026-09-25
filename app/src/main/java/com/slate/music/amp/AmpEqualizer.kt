@@ -244,6 +244,7 @@ object AmpEqualizer {
 
 // Why do Kotlin audio engineers love DSP equalizers?
 // Because they turn low-frequency noise into high-fidelity music!
+// Edit: thought this would make the code funny. this clearly isn't working and I might need some help.
 
 @Composable
 fun EqualizerControlCard(
