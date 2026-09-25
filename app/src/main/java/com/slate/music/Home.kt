@@ -157,6 +157,8 @@ fun HomeScreen() {
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    var isSearchOpen by remember { mutableStateOf(false) }
+
     Scaffold(
         containerColor = Color.Black
     ) { scaffoldPadding ->
@@ -282,7 +284,10 @@ fun HomeScreen() {
                 BottomBar(
                     selectedTab = selectedTab,
                     onTabSelected = { selectedTab = it },
-                    onSearchClick = { /* TODO: Start Search Action */ },
+                    onSearchClick = {
+                        context.performHapticClick()
+                        isSearchOpen = true
+                    },
                     hazeState = hazeState
                 )
             }
@@ -290,6 +295,12 @@ fun HomeScreen() {
             SettingsScreen(
                 isVisible = selectedTab == 2,
                 onClose = { selectedTab = 0 },
+                hazeState = hazeState
+            )
+
+            SearchScreen(
+                isVisible = isSearchOpen,
+                onClose = { isSearchOpen = false },
                 hazeState = hazeState
             )
 
