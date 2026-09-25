@@ -47,6 +47,8 @@ class MainActivity : ComponentActivity() {
 
         AmpEngine.initialize(this)
 
+        PlaylistManager.initialize(this)
+
         ListeningStatsManager.initialize(this)
 
         super.onCreate(savedInstanceState)
