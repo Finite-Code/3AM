@@ -31,4 +31,5 @@ cd 3AM
 
 ## 🧑‍⚖️ License
 This project utilizes GPL-3.0
+
 Checkout LICENSE
