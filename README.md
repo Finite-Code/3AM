@@ -12,7 +12,7 @@
 > Coming Soon
 
 ## 🏗️ the Stack
-- **UI**: Jetpack Compose, Material 3 Expressive, Coil, Haze from chrisbanes (a shoutout to his great library!) 
+- **UI**: Jetpack Compose, Material 3 Expressive, Coil, [Haze from chrisbanes](https://chrisbanes.github.io/haze/latest/)
 - **Audio**: Jetpack Media3.
 
 ## 🛠️ Building
@@ -32,4 +32,4 @@ cd 3AM
 ## 🧑‍⚖️ License
 **This project utilizes GPL-3.0 LICENSE**
 
-*Checkout LICENSE*
+*Checkout [LICENSE](https://github.com/Finite-Code/3AM/blob/main/LICENSE)*
