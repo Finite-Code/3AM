@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import coil.compose.AsyncImage
+import androidx.media3.common.Player
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -32,11 +33,15 @@ fun MusicPlayer(
     currentPosText: String,
     durtnText: String,
     liked: Boolean,
-    onPlayPauseToggle: ()  -> Unit,
+    repeatMode: Int = Player.REPEAT_MODE_OFF,
+    isShuffleEnabled: Boolean = false,
+    onPlayPauseToggle: () -> Unit,
     onSkipPrevious: () -> Unit,
     onSkipNext: () -> Unit,
     onSeek: (Float) -> Unit,
     onLikeToggle: () -> Unit,
+    onShuffleToggle: () -> Unit,
+    onRepeatToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -52,14 +57,14 @@ fun MusicPlayer(
                 .clip(RoundedCornerShape(24.dp))
                 .background(Color(0xFF1E1E1E))
         ) {
-            if(!albumArtUrl.isNullOrEmpty()) {
+            if (!albumArtUrl.isNullOrEmpty()) {
                 AsyncImage(
                     model = albumArtUrl,
                     contentDescription = "Album Art :)",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
-            } else{
+            } else {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -75,12 +80,12 @@ fun MusicPlayer(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(modifier = Modifier.weight(1f)){
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title.lowercase(),
                     style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Black,
-                     fontSize = 28.sp
+                        fontWeight = FontWeight.Black,
+                        fontSize = 28.sp
                     ),
                     color = Color.White,
                     maxLines = 1,
@@ -111,14 +116,14 @@ fun MusicPlayer(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Column(modifier = Modifier.fillMaxWidth()){
+        Column(modifier = Modifier.fillMaxWidth()) {
             Slider(
                 value = progress,
                 onValueChange = onSeek,
                 colors = SliderDefaults.colors(
                     thumbColor = Color.White,
                     activeTrackColor = Color.White,
-                    inactiveTrackColor = Color.White.copy(alpha=0.2f)
+                    inactiveTrackColor = Color.White.copy(alpha = 0.2f)
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -143,15 +148,16 @@ fun MusicPlayer(
         Spacer(modifier = Modifier.height(20.dp))
 
         Row(
-           modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly
-        ){
-            IconButton(onClick = {/* TODO: Shuffle */ }){
+        ) {
+            // Shuffle Toggle Button
+            IconButton(onClick = onShuffleToggle) {
                 Icon(
                     imageVector = Icons.Rounded.Shuffle,
                     contentDescription = "Shuffle",
-                    tint = Color.LightGray,
+                    tint = if (isShuffleEnabled) Color.White else Color.DarkGray
                 )
             }
 
@@ -168,14 +174,14 @@ fun MusicPlayer(
                 shape = CircleShape,
                 color = Color.White,
                 modifier = Modifier.size(52.dp)
-            ){
-                IconButton(onClick = onPlayPauseToggle,
+            ) {
+                IconButton(
+                    onClick = onPlayPauseToggle,
                     modifier = Modifier.fillMaxSize()
                 ) {
-
                     Icon(
                         imageVector = if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
-                        contentDescription = if(isPlaying) "Pause" else "Play",
+                        contentDescription = if (isPlaying) "Pause" else "Play",
                         tint = Color.Black,
                         modifier = Modifier.size(36.dp)
                     )
@@ -191,11 +197,15 @@ fun MusicPlayer(
                 )
             }
 
-            IconButton(onClick = {/* TODO: Repeat */ }){
+            IconButton(onClick = onRepeatToggle) {
                 Icon(
-                    imageVector = Icons.Rounded.Repeat,
+                    imageVector = if (repeatMode == Player.REPEAT_MODE_ONE) {
+                        Icons.Rounded.RepeatOne
+                    } else {
+                        Icons.Rounded.Repeat
+                    },
                     contentDescription = "Repeat",
-                    tint = Color.LightGray,
+                    tint = if (repeatMode != Player.REPEAT_MODE_OFF) Color.White else Color.DarkGray
                 )
             }
         }

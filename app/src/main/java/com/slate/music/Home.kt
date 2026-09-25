@@ -348,6 +348,8 @@ fun HomeScreen() {
                         0f
                     }
 
+                    // Inside ModalBottomSheet in Home.kt:
+
                     MusicPlayer(
                         title = title,
                         artist = artist,
@@ -357,14 +359,34 @@ fun HomeScreen() {
                         currentPosText = currentPosText,
                         durtnText = durtnText,
                         liked = isTrackLiked,
-                        onPlayPauseToggle = { AmpEngine.togglePlayPause() },
-                        onSkipPrevious = { AmpEngine.skipPrevious() },
-                        onSkipNext = { AmpEngine.skipNext() },
+                        repeatMode = ampState.repeatMode,
+                        isShuffleEnabled = ampState.shuffleModeEnabled,
+                        onPlayPauseToggle = {
+                            context.performHapticClick()
+                            AmpEngine.togglePlayPause()
+                        },
+                        onSkipPrevious = {
+                            context.performHapticClick()
+                            AmpEngine.skipPrevious()
+                        },
+                        onSkipNext = {
+                            context.performHapticClick()
+                            AmpEngine.skipNext()
+                        },
                         onSeek = { newProgressFraction ->
                             val targetMs = (newProgressFraction * ampState.durationMs).toLong()
                             AmpEngine.seekTo(targetMs)
                         },
+                        onShuffleToggle = {
+                            context.performHapticClick()
+                            AmpEngine.toggleShuffleMode()
+                        },
+                        onRepeatToggle = {
+                            context.performHapticClick()
+                            AmpEngine.toggleRepeatMode()
+                        },
                         onLikeToggle = {
+                            context.performHapticClick()
                             if (trackId.isNotEmpty()) {
                                 favTrackIds = if (trackId in favTrackIds) {
                                     favTrackIds - trackId
