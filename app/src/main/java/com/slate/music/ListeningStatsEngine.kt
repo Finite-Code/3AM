@@ -52,6 +52,11 @@ object ListeningStatsManager {
             hourlyMap[h] = prefs.getInt("hour_$h", if (h == 3) 14 else (1..8).random())
         }
 
+        // Load real recorded hourly play counts from SharedPreferences
+        for (h in 0..23) {
+            hourlyMap[h] = prefs.getInt("hour_$h", 0)
+        }
+
         refreshState(todayMs, weeklyMs)
     }
 

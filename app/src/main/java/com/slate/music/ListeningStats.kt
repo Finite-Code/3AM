@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.unit.IntOffset
@@ -77,6 +78,7 @@ fun ListeningStatsScreen(
     ) {
         val statsState by ListeningStatsManager.state.collectAsState()
         val isBlurEnabled by AppSettings.isBlurEnabled.collectAsState()
+        val context = LocalContext.current
         val scrollState = rememberLazyListState()
 
         DeadEndHapticHandler(scrollState)
@@ -165,6 +167,9 @@ fun ListeningStatsScreen(
 
                 // Night Heatmap Card
                 item {
+                    var selectedHourBar by remember { mutableStateOf<Int?>(null) }
+                    val selectedHourCount = selectedHourBar?.let { statsState.hourlyDistribution[it] ?: 0 } ?: 0
+
                     Surface(
                         shape = RoundedCornerShape(22.dp),
                         color = Color(0xFF141414),
@@ -203,7 +208,11 @@ fun ListeningStatsScreen(
                                         .padding(horizontal = 10.dp, vertical = 4.dp)
                                 ) {
                                     Text(
-                                        text = "${statsState.nightOwl3AmPlayCount} plays",
+                                        text = if (selectedHourBar != null) {
+                                            String.format("%02d:00 • %d plays", selectedHourBar, selectedHourCount)
+                                        } else {
+                                            "${statsState.nightOwl3AmPlayCount} plays @ 03:00"
+                                        },
                                         color = Color(0xFFEFB4E0),
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold
@@ -214,37 +223,50 @@ fun ListeningStatsScreen(
                             Spacer(modifier = Modifier.height(20.dp))
 
                             // Hourly Distribution Bars
-                            val maxCount = (statsState.hourlyDistribution.values.maxOrNull()
-                                ?: 1).coerceAtLeast(1)
+                            val maxCount = (statsState.hourlyDistribution.values.maxOrNull() ?: 1).coerceAtLeast(1)
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(90.dp),
+                                    .height(95.dp),
                                 horizontalArrangement = Arrangement.spacedBy(3.dp),
                                 verticalAlignment = Alignment.Bottom
                             ) {
                                 for (hour in 0..23) {
                                     val count = statsState.hourlyDistribution[hour] ?: 0
-                                    val barHeightFraction =
-                                        (count.toFloat() / maxCount).coerceIn(0.08f, 1f)
+                                    val targetFraction = (count.toFloat() / maxCount).coerceIn(0.08f, 1f)
+                                    val animatedHeightFraction by animateFloatAsState(
+                                        targetValue = targetFraction,
+                                        animationSpec = spring(
+                                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                                            stiffness = Spring.StiffnessLow
+                                        ),
+                                        label = "BarHeight"
+                                    )
+                                    val isSelected = selectedHourBar == hour
                                     val is3Am = hour == 3
 
                                     Column(
                                         modifier = Modifier
                                             .weight(1f)
-                                            .fillMaxHeight(),
+                                            .fillMaxHeight()
+                                            .clickable {
+                                                context.performHapticClick()
+                                                selectedHourBar = if (selectedHourBar == hour) null else hour
+                                            },
                                         verticalArrangement = Arrangement.Bottom,
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         Box(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .fillMaxHeight(barHeightFraction)
+                                                .fillMaxHeight(animatedHeightFraction)
                                                 .clip(RoundedCornerShape(4.dp))
                                                 .background(
-                                                    if (is3Am) Color(0xFFEFB4E0) else Color.White.copy(
-                                                        alpha = 0.25f
-                                                    )
+                                                    when {
+                                                        isSelected -> Color.White
+                                                        is3Am -> Color(0xFFEFB4E0)
+                                                        else -> Color.White.copy(alpha = 0.25f)
+                                                    }
                                                 )
                                         )
                                     }
