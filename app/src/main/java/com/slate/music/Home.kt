@@ -153,8 +153,6 @@ fun HomeScreen() {
         isPlayerSheetVisible = true
         val songIndex = songs.indexOfFirst { it.id.toString() == track.id }
         if (songIndex >= 0) {
-            val selectedSong = songs[songIndex]
-            ListeningStatsManager.recordTrackPlay(context, selectedSong)
             AmpEngine.playPlaylist(songs, songIndex)
         }
     }
