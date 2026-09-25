@@ -27,6 +27,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -64,20 +65,25 @@ fun ListeningStatsScreen(
         stiffness = Spring.StiffnessLow
     )
 
+    val localHazeState = remember { HazeState() }
+
     AnimatedVisibility(
         visible = isVisible,
         enter = slideInHorizontally(
             initialOffsetX = { fullWidth -> -fullWidth },
             animationSpec = lowSpringAnim
-        ) + fadeIn(tween(300)),
+        ),
         exit = slideOutHorizontally(
             targetOffsetX = { fullWidth -> -fullWidth },
             animationSpec = lowSpringAnim
-        ) + fadeOut(tween(300)),
+        ),
         modifier = modifier
+            .fillMaxSize()
+            .background(Color.Black)
     ) {
         val statsState by ListeningStatsManager.state.collectAsState()
         val isBlurEnabled by AppSettings.isBlurEnabled.collectAsState()
+
         val context = LocalContext.current
         val scrollState = rememberLazyListState()
 
@@ -98,7 +104,7 @@ fun ListeningStatsScreen(
                 state = scrollState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .hazeSource(state = hazeState),
+                    .hazeSource(state = localHazeState),
                 contentPadding = PaddingValues(
                     top = 180.dp,
                     bottom = 120.dp,
@@ -388,7 +394,7 @@ fun ListeningStatsScreen(
                     .then(
                         if (isBlurEnabled) {
                             Modifier.hazeBlur(
-                                input = HazeInput.Sources(state = hazeState),
+                                input = HazeInput.Sources(state = localHazeState),
                                 style = HazeBlurStyle {
                                     blurRadius(24.dp)
                                     noiseFactor(0f)
@@ -402,7 +408,15 @@ fun ListeningStatsScreen(
                             )
                         } else Modifier
                     )
-                    .background(if (isBlurEnabled) Color.Black.copy(alpha = 0.75f) else Color.Black)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Black.copy(alpha = if (isBlurEnabled) 0.85f else 1.0f),
+                                Color.Black.copy(alpha = if (isBlurEnabled) 0.35f else 0.70f),
+                                Color.Transparent // Soft feather at bottom edge
+                            )
+                        )
+                    )
                     .align(Alignment.TopCenter)
             ) {
                 Row(
