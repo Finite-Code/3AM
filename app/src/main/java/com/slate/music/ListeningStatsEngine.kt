@@ -75,15 +75,15 @@ object ListeningStatsManager {
         val timeToAddMs = if (actualPlayedMs > 0L) {
             actualPlayedMs.coerceAtMost(song.durationMs)
         } else {
-            song.durationMs
+            0L
         }
 
         // Also ignore any short term playback as "listened to time". since ppl don't listen to songs for 10s only!
         if (timeToAddMs < 10000L) return
 
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val newTodayMs = prefs.getLong(KEY_TODAY_TIME, 0L) + song.durationMs
-        val newWeeklyMs = prefs.getLong(KEY_WEEKLY_TIME, 0L) + song.durationMs
+        val newTodayMs = prefs.getLong(KEY_TODAY_TIME, 0L) + timeToAddMs
+        val newWeeklyMs = prefs.getLong(KEY_WEEKLY_TIME, 0L) + timeToAddMs
 
         prefs.edit()
             .putLong(KEY_TODAY_TIME, newTodayMs)
