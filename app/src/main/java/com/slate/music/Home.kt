@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -138,7 +137,8 @@ fun HomeScreen() {
         }
     }
 
-    var favTrackIds by rememberSaveable { mutableStateOf(setOf<String>()) }
+    val favTrackIds by AppSettings.favoriteTrackIds.collectAsState()
+
     val favTracks = remember(displayTracks, favTrackIds) {
         displayTracks.filter { track -> track.id in favTrackIds }
     }
@@ -388,11 +388,7 @@ fun HomeScreen() {
                         onLikeToggle = {
                             context.performHapticClick()
                             if (trackId.isNotEmpty()) {
-                                favTrackIds = if (trackId in favTrackIds) {
-                                    favTrackIds - trackId
-                                } else {
-                                    favTrackIds + trackId
-                                }
+                                AppSettings.toggleFavorite(context, trackId)
                             }
                         },
                         modifier = Modifier.padding(bottom = 24.dp)
