@@ -1,11 +1,13 @@
 package com.slate.music
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MusicNote
@@ -14,8 +16,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -25,6 +29,7 @@ import com.slate.music.Heart.HeartEngine
 import com.slate.music.Heart.HeartSong
 import com.slate.music.amp.AmpEngine
 import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.hazeBlur
@@ -40,6 +45,7 @@ fun LibraryScreen(
     var selectedCategory by remember { mutableIntStateOf(0) }
     val categories = remember { listOf("Songs", "Artists", "Albums") }
     val scrollState = rememberLazyListState()
+    val context = LocalContext.current
 
     DeadEndHapticHandler(scrollState)
 
@@ -52,15 +58,18 @@ fun LibraryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .hazeSource(state = hazeState),
-            contentPadding = PaddingValues(top = 180.dp, bottom = 120.dp, start = 16.dp, end = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            contentPadding = PaddingValues(top = 190.dp, bottom = 120.dp, start = 16.dp, end = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             when (selectedCategory) {
                 0 -> {
                     itemsIndexed(songs, key = { _, song -> song.id }) { index, song ->
                         LibrarySongRow(
                             song = song,
-                            onClick = { AmpEngine.playPlaylist(songs, index) }
+                            onClick = {
+                                context.performHapticClick()
+                                AmpEngine.playPlaylist(songs, index)
+                            }
                         )
                     }
                 }
@@ -71,7 +80,11 @@ fun LibraryScreen(
                                 title = artist,
                                 subtitle = "${artistSongs.size} tracks",
                                 albumArtUri = artistSongs.firstOrNull()?.albumArtUri,
-                                onClick = { AmpEngine.playPlaylist(artistSongs, 0) }
+                                isArtist = true,
+                                onClick = {
+                                    context.performHapticClick()
+                                    AmpEngine.playPlaylist(artistSongs, 0)
+                                }
                             )
                         }
                     }
@@ -83,7 +96,11 @@ fun LibraryScreen(
                                 title = album,
                                 subtitle = "${albumSongs.size} tracks",
                                 albumArtUri = albumSongs.firstOrNull()?.albumArtUri,
-                                onClick = { AmpEngine.playPlaylist(albumSongs, 0) }
+                                isArtist = false,
+                                onClick = {
+                                    context.performHapticClick()
+                                    AmpEngine.playPlaylist(albumSongs, 0)
+                                }
                             )
                         }
                     }
@@ -91,10 +108,11 @@ fun LibraryScreen(
             }
         }
 
+        // Glassmorphic Header Overlay
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(170.dp)
+                .height(180.dp)
                 .then(
                     if (isBlurEnabled) {
                         Modifier.hazeBlur(
@@ -102,11 +120,35 @@ fun LibraryScreen(
                             style = HazeBlurStyle {
                                 blurRadius(24.dp)
                                 noiseFactor(0f)
+                                progressive(
+                                    HazeProgressive.verticalGradient(
+                                        startIntensity = 0.90f,
+                                        endIntensity = 0.0f
+                                    )
+                                )
                             }
                         )
                     } else Modifier
                 )
-                .background(if (isBlurEnabled) Color.Black.copy(alpha = 0.65f) else Color.Black)
+                .background(
+                    if (isBlurEnabled) {
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Black.copy(alpha = 0.85f),
+                                Color.Black.copy(alpha = 0.35f),
+                                Color.Transparent
+                            )
+                        )
+                    } else {
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Black,
+                                Color.Black.copy(alpha = 0.90f),
+                                Color.Transparent
+                            )
+                        )
+                    }
+                )
                 .align(Alignment.TopCenter)
         ) {
             Column(
@@ -117,31 +159,56 @@ fun LibraryScreen(
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Library",
+                    text = "library",
                     style = MaterialTheme.typography.displayLarge,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 40.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 64.sp,
                     color = Color.White
                 )
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                // Category Selector Bar
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFF181818),
+                    modifier = Modifier.height(44.dp)
                 ) {
-                    categories.forEachIndexed { index, title ->
-                        FilterChip(
-                            selected = selectedCategory == index,
-                            onClick = { selectedCategory = index },
-                            label = { Text(title, fontWeight = FontWeight.SemiBold) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = Color.White,
-                                selectedLabelColor = Color.Black,
-                                containerColor = Color(0xFF1E1E1E),
-                                labelColor = Color.LightGray
-                            ),
-                            border = null,
-                            shape = RoundedCornerShape(12.dp)
-                        )
+                    Row(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .fillMaxHeight(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        categories.forEachIndexed { index, title ->
+                            val isSelected = selectedCategory == index
+                            val backgroundColor by animateColorAsState(
+                                targetValue = if (isSelected) Color.White else Color.Transparent,
+                                label = "CategoryBg"
+                            )
+                            val textColor by animateColorAsState(
+                                targetValue = if (isSelected) Color.Black else Color.Gray,
+                                label = "CategoryText"
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                                    .clip(CircleShape)
+                                    .background(backgroundColor)
+                                    .clickable {
+                                        context.performHapticClick()
+                                        selectedCategory = index
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = title,
+                                    color = textColor,
+                                    fontSize = 14.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -158,7 +225,7 @@ private fun LibrarySongRow(
     val durationText = String.format("%d:%02d", durationSecs / 60, durationSecs % 60)
 
     Surface(
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(18.dp),
         color = Color(0xFF141414),
         modifier = Modifier
             .fillMaxWidth()
@@ -167,13 +234,13 @@ private fun LibrarySongRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
+                .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
                     .size(48.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(12.dp))
                     .background(Color(0xFF242424))
             ) {
                 if (!song.albumArtUri.isNullOrEmpty()) {
@@ -202,7 +269,7 @@ private fun LibrarySongRow(
                     text = song.title,
                     color = Color.White,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -219,6 +286,7 @@ private fun LibrarySongRow(
                 text = durationText,
                 color = Color.Gray,
                 fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(start = 8.dp)
             )
         }
@@ -230,10 +298,13 @@ private fun LibraryGroupCard(
     title: String,
     subtitle: String,
     albumArtUri: String?,
+    isArtist: Boolean,
     onClick: () -> Unit
 ) {
+    val artShape = if (isArtist) CircleShape else RoundedCornerShape(12.dp)
+
     Surface(
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(18.dp),
         color = Color(0xFF141414),
         modifier = Modifier
             .fillMaxWidth()
@@ -242,13 +313,13 @@ private fun LibraryGroupCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 12.dp),
+                .padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
                     .size(52.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(artShape)
                     .background(Color(0xFF242424))
             ) {
                 if (!albumArtUri.isNullOrEmpty()) {
