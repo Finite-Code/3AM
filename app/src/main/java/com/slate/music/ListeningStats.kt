@@ -82,7 +82,7 @@ fun ListeningStatsScreen(
 
         DeadEndHapticHandler(scrollState)
 
-        \n        \n        val todayHours = statsState.todayListeningTimeMs / 1000 / 3600
+        \n        \n        \n        val todayHours = statsState.todayListeningTimeMs / 1000 / 3600
         val todayMins = (statsState.todayListeningTimeMs / 1000 % 3600) / 60
 
         val weeklyHours = statsState.weeklyListeningTimeMs / 1000 / 3600
@@ -260,7 +260,7 @@ fun ListeningStatsScreen(
                             ) {
                                 Text("00:00", color = Color.Gray, fontSize = 11.sp)
                                 Text(
-                                    "03:00 (Peak)",
+                                    "3AM (Peak)",
                                     color = Color(0xFFEFB4E0),
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold
