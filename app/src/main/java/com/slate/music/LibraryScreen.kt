@@ -266,17 +266,20 @@ private fun LibrarySongRow(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = song.title,
+                    text = song.title.lowercase(),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Black,
+                        fontSize = 16.sp
+                    ),
                     color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
+                    letterSpacing = (-1.0).sp,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = song.artist,
-                    color = Color.Gray,
-                    fontSize = 13.sp,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.LightGray,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
