@@ -10,7 +10,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,7 +41,6 @@ import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.hazeBlur
 import dev.chrisbanes.haze.hazeSource
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draw.clip
@@ -350,6 +348,8 @@ fun HomeScreen() {
                         0f
                     }
 
+                    // Inside ModalBottomSheet in Home.kt:
+
                     MusicPlayer(
                         title = title,
                         artist = artist,
@@ -359,14 +359,34 @@ fun HomeScreen() {
                         currentPosText = currentPosText,
                         durtnText = durtnText,
                         liked = isTrackLiked,
-                        onPlayPauseToggle = { AmpEngine.togglePlayPause() },
-                        onSkipPrevious = { AmpEngine.skipPrevious() },
-                        onSkipNext = { AmpEngine.skipNext() },
+                        repeatMode = ampState.repeatMode,
+                        isShuffleEnabled = ampState.shuffleModeEnabled,
+                        onPlayPauseToggle = {
+                            context.performHapticClick()
+                            AmpEngine.togglePlayPause()
+                        },
+                        onSkipPrevious = {
+                            context.performHapticClick()
+                            AmpEngine.skipPrevious()
+                        },
+                        onSkipNext = {
+                            context.performHapticClick()
+                            AmpEngine.skipNext()
+                        },
                         onSeek = { newProgressFraction ->
                             val targetMs = (newProgressFraction * ampState.durationMs).toLong()
                             AmpEngine.seekTo(targetMs)
                         },
+                        onShuffleToggle = {
+                            context.performHapticClick()
+                            AmpEngine.toggleShuffleMode()
+                        },
+                        onRepeatToggle = {
+                            context.performHapticClick()
+                            AmpEngine.toggleRepeatMode()
+                        },
                         onLikeToggle = {
+                            context.performHapticClick()
                             if (trackId.isNotEmpty()) {
                                 favTrackIds = if (trackId in favTrackIds) {
                                     favTrackIds - trackId
