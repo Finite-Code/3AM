@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slate.music.Heart.HeartEngine
@@ -80,18 +81,26 @@ fun HomeScreen() {
     val stickyHeaderHeightPx = with(density) { stickyHeaderHeight.toPx() }
     val maxScrollPx = headerMaxHeightPx - stickyHeaderHeightPx
 
-    val scrollOffset by remember {
+    val isCollapsed by remember {
         derivedStateOf {
-            if (scrollState.firstVisibleItemIndex == 0) {
+            val offset = if (scrollState.firstVisibleItemIndex == 0) {
                 scrollState.firstVisibleItemScrollOffset.toFloat()
             } else {
                 maxScrollPx + 1000f
             }
+            (offset / maxScrollPx) > 0.5f
         }
     }
-
-    val collapseFraction = (scrollOffset / maxScrollPx).coerceIn(0f, 1f)
-    val isCollapsed = collapseFraction > 0.5f
+    val collapseFraction = remember {
+        derivedStateOf {
+            val offset = if (scrollState.firstVisibleItemIndex == 0) {
+                scrollState.firstVisibleItemScrollOffset.toFloat()
+            } else {
+                maxScrollPx + 1000f
+            }
+            (offset / maxScrollPx).coerceIn(0f, 1f)
+        }
+    }.value
 
     val context = LocalContext.current
     LaunchedEffect(isCollapsed) {
@@ -221,58 +230,16 @@ fun HomeScreen() {
                     item { Spacer(modifier = Modifier.height(100.dp)) }
                 }
 
-                val currentHeaderHeight = headerMaxHeight - ((headerMaxHeight - stickyHeaderHeight) * collapseFraction)
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(currentHeaderHeight)
-                        .hazeBlur(
-                            input = HazeInput.Sources(state = hazeState),
-                            style = HazeBlurStyle {
-                                blurRadius(if (isBlurEnabled) 24.dp else 0.dp)
-                                noiseFactor(0f)
-                                progressive(
-                                    HazeProgressive.verticalGradient(
-                                        startIntensity = if (isBlurEnabled) 0.90f else 0f,
-                                        endIntensity = 0.0f
-                                    )
-                                )
-                            }
-                        )
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Black.copy(alpha = (0.80f * collapseFraction + 0.25f).coerceIn(0f, 1f)),
-                                    Color.Black.copy(alpha = (0.30f * collapseFraction).coerceIn(0f, 1f)),
-                                    Color.Transparent
-                                )
-                            )
-                        )
-                        .align(Alignment.TopCenter)
-                ) {
-                    Box(modifier = Modifier.statusBarsPadding().fillMaxSize()) {
-                        val fontSize = (148 - ((148 - 108) * snappedFraction)).sp
-
-                        Text(
-                            text = "3AM",
-                            style = MaterialTheme.typography.displayLarge.copy(
-                                fontWeight = FontWeight.ExtraBold,
-                                letterSpacing = 2.sp,
-                                brush = brushedSteelBrush,
-                                shadow = Shadow(
-                                    color = Color.Black.copy(alpha = 0.6f),
-                                    offset = Offset(0f, 4f),
-                                    blurRadius = 6f
-                                )
-                            ),
-                            fontSize = fontSize,
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(start = 24.dp, bottom = 12.dp)
-                        )
-                    }
-                }
+                HomeCollapsingHeader(
+                    collapseFraction = collapseFraction,
+                    snappedFraction = snappedFraction,
+                    brushedSteelBrush = brushedSteelBrush,
+                    isBlurEnabled = isBlurEnabled,
+                    hazeState = hazeState,
+                    headerMaxHeight = headerMaxHeight,
+                    stickyHeaderHeight = stickyHeaderHeight,
+                    modifier = Modifier.align(Alignment.TopCenter)
+                )
             }
 
             Column(
@@ -588,6 +555,69 @@ fun MusicSectionRow(
                     )
                 }
             }
+        }
+    }
+}
+@Composable
+private fun HomeCollapsingHeader(
+    collapseFraction: Float,
+    snappedFraction: Float,
+    brushedSteelBrush: Brush,
+    isBlurEnabled: Boolean,
+    hazeState: HazeState,
+    headerMaxHeight: Dp,
+    stickyHeaderHeight: Dp,
+    modifier: Modifier = Modifier
+) {
+    val currentHeaderHeight = headerMaxHeight - (headerMaxHeight - stickyHeaderHeight) * collapseFraction
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(currentHeaderHeight)
+            .hazeBlur(
+                input = HazeInput.Sources(state = hazeState),
+                style = HazeBlurStyle {
+                    blurRadius(if (isBlurEnabled) 24.dp else 0.dp)
+                    noiseFactor(0f)
+                    progressive(
+                        HazeProgressive.verticalGradient(
+                            startIntensity = if (isBlurEnabled) 0.90f else 0f,
+                            endIntensity = 0.0f
+                        )
+                    )
+                }
+            )
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color.Black.copy(alpha = (0.80f * collapseFraction + 0.25f).coerceIn(0f, 1f)),
+                        Color.Black.copy(alpha = (0.30f * collapseFraction).coerceIn(0f, 1f)),
+                        Color.Transparent
+                    )
+                )
+            )
+    ) {
+        Box(modifier = Modifier.statusBarsPadding().fillMaxSize()) {
+            val fontSize = (148 - ((148 - 108) * snappedFraction)).sp
+
+            Text(
+                text = "3AM",
+                style = MaterialTheme.typography.displayLarge.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 2.sp,
+                    brush = brushedSteelBrush,
+                    shadow = Shadow(
+                        color = Color.Black.copy(alpha = 0.6f),
+                        offset = Offset(0f, 4f),
+                        blurRadius = 6f
+                    )
+                ),
+                fontSize = fontSize,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 24.dp, bottom = 12.dp)
+            )
         }
     }
 }

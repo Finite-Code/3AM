@@ -47,10 +47,7 @@ android {
 tasks.register("incrementBuildCounter"){
     doLast {
         val nextCounter = currentBuildCounter + 1
-        versioningProps.setProperty("build.counter", nextCounter.toString())
-        versioningFile.outputStream().use {
-            versioningProps.store(it, "Automated Build Counter")
-        }
+        versioningFile.writeText("build.counter=$nextCounter\n")
     }
 }
 
