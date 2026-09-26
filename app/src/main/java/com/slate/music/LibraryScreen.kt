@@ -1,6 +1,7 @@
 package com.slate.music
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,7 +11,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.QueueMusic
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,17 +39,23 @@ import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.hazeBlur
 import dev.chrisbanes.haze.hazeSource
 
+// TODO: @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun LibraryScreen(
     hazeState: HazeState,
     modifier: Modifier = Modifier
 ) {
     val songs by HeartEngine.songs.collectAsState()
+    val playlists by PlaylistManager.playlists.collectAsState()
     val isBlurEnabled by AppSettings.isBlurEnabled.collectAsState()
     var selectedCategory by remember { mutableIntStateOf(0) }
-    val categories = remember { listOf("Songs", "Artists", "Albums") }
+    val categories = remember { listOf("Songs", "Artists", "Albums", "Playlists") }
     val scrollState = rememberLazyListState()
     val context = LocalContext.current
+
+    var showCreateDialog by remember { mutableStateOf(false) }
+    var playlistNameInput by remember { mutableStateOf("") }
+    var playlistDescInput by remember { mutableStateOf("") }
 
     DeadEndHapticHandler(scrollState)
 
@@ -58,7 +68,12 @@ fun LibraryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .hazeSource(state = hazeState),
-            contentPadding = PaddingValues(top = 190.dp, bottom = 120.dp, start = 16.dp, end = 16.dp),
+            contentPadding = PaddingValues(
+                top = 190.dp,
+                bottom = 120.dp,
+                start = 16.dp,
+                end = 16.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             when (selectedCategory) {
@@ -73,6 +88,7 @@ fun LibraryScreen(
                         )
                     }
                 }
+
                 1 -> {
                     groupedArtists.forEach { (artist, artistSongs) ->
                         item(key = artist) {
@@ -89,6 +105,7 @@ fun LibraryScreen(
                         }
                     }
                 }
+
                 2 -> {
                     groupedAlbums.forEach { (album, albumSongs) ->
                         item(key = album) {
@@ -105,7 +122,165 @@ fun LibraryScreen(
                         }
                     }
                 }
+
+                3 -> {
+                    item {
+                        Surface(
+                            shape = RoundedCornerShape(18.dp),
+                            color = Color(0xFF1E1E1E),
+                            modifier = Modifier.fillMaxWidth().clickable {
+                                context.performHapticClick()
+                                playlistNameInput = "A good name"
+                                playlistDescInput = "For starters..."
+                                showCreateDialog = true
+                            }
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Add,
+                                    contentDescription = null,
+                                    tint = Color(0xFFEFB4E0),
+                                    modifier = Modifier.size(24.dp)
+                                )
+
+                                Spacer(modifier = Modifier.width(12.dp))
+
+                                Text(
+                                    text = "Create a Playlist",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
+                        }
+                    }
+
+                    itemsIndexed(playlists, key = { _, playlist -> playlist.id }) { _, playlist ->
+                        val playlistSongs = remember(songs, playlist.songIds) {
+                            songs.filter { it.id in playlist.songIds }
+                        }
+
+                        Surface(
+                            shape = RoundedCornerShape(18.dp),
+                            color = Color(0xFF141414),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        if (playlistSongs.isNotEmpty()) {
+                                            context.performHapticClick()
+                                            AmpEngine.playPlaylist(playlistSongs, 0)
+                                        }
+                                    }
+                                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(52.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(Color(0xFF242424))
+                                ) {
+                                    if (playlistSongs.firstOrNull()?.albumArtUri != null) {
+                                        AsyncImage(
+                                            model = playlistSongs.first().albumArtUri,
+                                            contentDescription = null,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Rounded.QueueMusic,
+                                            contentDescription = null,
+                                            tint = Color.Gray,
+                                            modifier = Modifier
+                                                .size(28.dp)
+                                                .align(Alignment.Center)
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.width(16.dp))
+
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = playlist.name,
+                                        color = Color.White,
+                                        fontSize = 17.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = "${playlist.songIds.size} tracks",
+                                        color = Color.Gray,
+                                        fontSize = 13.sp,
+                                        maxLines = 1
+                                    )
+                                }
+
+                                IconButton(onClick = {
+                                    context.performHapticClick()
+                                    PlaylistManager.deletePlaylist(context, playlist.id)
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.DeleteOutline, // Outline cause it kinda looks better ig
+                                        contentDescription = "Delete Playlist",
+                                        tint = Color.Gray,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
+        }
+
+        if (showCreateDialog) {
+            AlertDialog(
+                onDismissRequest = { showCreateDialog = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        if (playlistNameInput.isNotBlank()) {
+                            PlaylistManager.createPlaylist(context, playlistNameInput, playlistDescInput)
+                        }
+                        showCreateDialog = false
+                    }) {
+                        Text("Create", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showCreateDialog = false }) {
+                        Text("Cancel", color = Color.Gray)
+                    }
+                },
+
+                title = { Text("Create Playlist") },
+
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = playlistNameInput,
+                            onValueChange = { playlistNameInput = it },
+                            label = { Text("Playlist Name") },
+                            singleLine = true
+                        )
+                    }
+                    OutlinedTextField(
+                        value = playlistDescInput,
+                        onValueChange = { playlistDescInput = it },
+                        label = { Text("Description (Optional)") },
+                        singleLine = true
+                    )
+                },
+                containerColor = Color(0xFF1E1E1E),
+            )
         }
 
         // Glassmorphic Header Overlay

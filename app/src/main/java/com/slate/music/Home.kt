@@ -123,6 +123,9 @@ fun HomeScreen() {
     val ampState by AmpEngine.state.collectAsState()
     val songs by HeartEngine.songs.collectAsState()
 
+    var showAddToPlaylistDialog by remember { mutableStateOf(false) }
+    val playlists by PlaylistManager.playlists.collectAsState()
+
     val displayTracks = remember(songs) {
         songs.map { song ->
             val mins = (song.durationMs / 1000 / 60).toInt()
@@ -159,6 +162,7 @@ fun HomeScreen() {
 
     var isSearchOpen by remember { mutableStateOf(false) }
     var isStatsOpen by remember { mutableStateOf(false) }
+    var isQueueOpen by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = Color.Black
@@ -319,6 +323,26 @@ fun HomeScreen() {
                 hazeState = hazeState
             )
 
+            QueueSheet(
+                isVisible = isQueueOpen,
+                onClose = { isQueueOpen = false },
+                hazeState = hazeState
+            )
+
+            if (showAddToPlaylistDialog && ampState.currentSong != null){
+                AlertDialog(
+                    onDismissRequest = { showAddToPlaylistDialog = false },
+                    title = { Text("Add to Playlist") },
+                    text = { Text("Select a playlist to add this song to:") },
+                    confirmButton = {
+                        TextButton(onClick = { showAddToPlaylistDialog = false}){
+                            Text("Cancel")
+                        }
+                    },
+                    containerColor = Color(0xFF1E1E1E)
+                )
+            }
+
             if (isPlayerSheetVisible && (selectedTrack != null || ampState.currentSong != null)) {
                 ModalBottomSheet(
                     onDismissRequest = {
@@ -347,8 +371,6 @@ fun HomeScreen() {
                     } else {
                         0f
                     }
-
-                    // Inside ModalBottomSheet in Home.kt:
 
                     MusicPlayer(
                         title = title,
@@ -384,6 +406,14 @@ fun HomeScreen() {
                         onRepeatToggle = {
                             context.performHapticClick()
                             AmpEngine.toggleRepeatMode()
+                        },
+                        onPlaylistAddToggle = {
+                            context.performHapticClick()
+                            showAddToPlaylistDialog = true
+                        },
+                        onQueueToggle = {
+                            context.performHapticClick()
+                            isQueueOpen = true
                         },
                         onLikeToggle = {
                             context.performHapticClick()
