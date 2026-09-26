@@ -1,4 +1,4 @@
-package com.slate.music.Heart
+package com.slate.music.data
 
 import android.content.ContentUris
 import android.content.Context

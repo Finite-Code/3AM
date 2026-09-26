@@ -1,5 +1,4 @@
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
-package com.slate.music
+package com.slate.music.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,17 +32,16 @@ fun SquareMusicCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            // Forces the card to be a perfect square
             .aspectRatio(1f)
             .clickable { onClick() },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
-        // Subtle shadow for that physical card feel
+        
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // 1. Album Art Background
-            // (Replace this Box with Coil's AsyncImage in your real app)
+            // album art
+            //
             if(track.imageUrl.isNotEmpty()) {
                 AsyncImage(
                     model = track.imageUrl,
@@ -59,8 +57,7 @@ fun SquareMusicCard(
                 )
             }
 
-            // 2. Gradient overlay so the white text is always readable
-            // no matter how bright the album art is
+            // gradient overlay
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -76,7 +73,7 @@ fun SquareMusicCard(
                     )
             )
 
-            // 3. Track Info locked to the bottom left
+            // track info
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
@@ -111,8 +108,8 @@ fun SquareMusicCardPreview() {
     SquareMusicCard(
         track = Track(
             id = "1",
-            title = "Blinding Lights",
-            artist = "The Weeknd",
+            title = "Nights",
+            artist = "Frank Ocean",
             imageUrl = "",
             duration = "4:03"
         ),

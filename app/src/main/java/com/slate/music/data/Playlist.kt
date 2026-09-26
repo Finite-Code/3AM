@@ -1,4 +1,4 @@
-package com.slate.music
+package com.slate.music.data
 
 import android.content.Context
 import kotlinx.coroutines.CoroutineScope

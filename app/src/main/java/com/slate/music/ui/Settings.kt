@@ -1,6 +1,10 @@
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
-package com.slate.music
+package com.slate.music.ui
+
+import com.slate.music.AppSettings
+import com.slate.music.util.DeadEndHapticHandler
+import com.slate.music.util.performHapticClick
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween

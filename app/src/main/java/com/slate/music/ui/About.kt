@@ -1,4 +1,4 @@
-package com.slate.music
+package com.slate.music.ui
 
 import android.content.Context
 import android.content.Intent
@@ -32,7 +32,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.slate.music.Heart.HeartEngine
+import com.slate.music.AppSettings
+import com.slate.music.data.HeartEngine
+import com.slate.music.util.DeadEndHapticHandler
+import com.slate.music.util.performHapticClick
 import com.slate.music.amp.AmpEngine
 import com.slate.music.amp.AmpEqualizer
 import dev.chrisbanes.haze.HazeInput

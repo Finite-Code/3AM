@@ -1,4 +1,6 @@
-package com.slate.music
+package com.slate.music.ui
+
+import com.slate.music.AppSettings
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape

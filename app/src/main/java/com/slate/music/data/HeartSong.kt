@@ -1,4 +1,4 @@
-package com.slate.music.Heart
+package com.slate.music.data
 
 data class HeartSong(
     val id: Long,

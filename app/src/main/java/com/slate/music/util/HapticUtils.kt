@@ -1,4 +1,6 @@
-package com.slate.music
+package com.slate.music.util
+
+import com.slate.music.AppSettings
 
 import android.content.Context
 import android.os.VibrationEffect

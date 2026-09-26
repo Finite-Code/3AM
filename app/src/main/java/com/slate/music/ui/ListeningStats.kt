@@ -1,4 +1,9 @@
-package com.slate.music
+package com.slate.music.ui
+
+import com.slate.music.AppSettings
+import com.slate.music.data.ListeningStatsManager
+import com.slate.music.util.DeadEndHapticHandler
+import com.slate.music.util.performHapticClick
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*

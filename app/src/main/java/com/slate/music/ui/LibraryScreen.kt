@@ -1,4 +1,4 @@
-package com.slate.music
+package com.slate.music.ui
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -29,8 +29,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.slate.music.Heart.HeartEngine
-import com.slate.music.Heart.HeartSong
+import com.slate.music.AppSettings
+import com.slate.music.data.HeartEngine
+import com.slate.music.data.HeartSong
+import com.slate.music.data.PlaylistManager
+import com.slate.music.util.DeadEndHapticHandler
+import com.slate.music.util.performHapticClick
 import com.slate.music.amp.AmpEngine
 import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.HazeProgressive

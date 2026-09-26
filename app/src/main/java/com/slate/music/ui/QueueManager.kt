@@ -1,10 +1,11 @@
-package com.slate.music
+package com.slate.music.ui
 
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -29,7 +30,11 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.slate.music.Heart.HeartSong
+import com.slate.music.AppSettings
+import com.slate.music.data.HeartSong
+import com.slate.music.data.PlaylistManager
+import com.slate.music.util.DeadEndHapticHandler
+import com.slate.music.util.performHapticClick
 import com.slate.music.amp.AmpEngine
 import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.HazeProgressive
@@ -39,9 +44,9 @@ import dev.chrisbanes.haze.blur.hazeBlur
 import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.CancellationException
 
-// Queue Management Sheet & Actions
-// TODO: Add drag-and-drop item reordering once Compose LazyList reorder API is stable!
-// Note: Currently active playing track is highlighted with a metallic pink stroke border.
+// active playing queue
+
+
 
 @Composable
 fun QueueSheet(
@@ -53,12 +58,8 @@ fun QueueSheet(
     var backProgress by remember { mutableFloatStateOf(0f) }
 
     PredictiveBackHandler(enabled = isVisible) { progressFlow ->
-        try {
-            progressFlow.collect { backEvent -> backProgress = backEvent.progress }
-            onClose()
-        } catch (_: CancellationException) {
-            backProgress = 0f
-        }
+        progressFlow.collect { backEvent -> backProgress = backEvent.progress }
+        onClose()
     }
 
     LaunchedEffect(isVisible) {
@@ -66,11 +67,11 @@ fun QueueSheet(
     }
 
     val lowSpringAnim = spring<IntOffset>(
-        dampingRatio = Spring.DampingRatioLowBouncy,
-        stiffness = Spring.StiffnessLow
+        dampingRatio = 0.8f,
+        stiffness = 300f
     )
 
-    val localHazeState = remember { HazeState() }
+    
 
     AnimatedVisibility(
         visible = isVisible,
@@ -115,7 +116,7 @@ fun QueueSheet(
                 state = scrollState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .hazeSource(state = localHazeState),
+                    .hazeSource(state = hazeState),
                 contentPadding = PaddingValues(top = 180.dp, bottom = 120.dp, start = 16.dp, end = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -154,7 +155,7 @@ fun QueueSheet(
                     }
                 }
 
-                // Currently active playing song item row
+                
                 item {
                     ampState.currentSong?.let { activeSong ->
                         QueueSongRow(
@@ -166,7 +167,7 @@ fun QueueSheet(
                 }
             }
 
-            // Header Overlay
+            
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -174,7 +175,7 @@ fun QueueSheet(
                     .then(
                         if (isBlurEnabled) {
                             Modifier.hazeBlur(
-                                input = HazeInput.Sources(state = localHazeState),
+                                input = HazeInput.Sources(state = hazeState),
                                 style = HazeBlurStyle {
                                     blurRadius(24.dp)
                                     noiseFactor(0f)
@@ -274,7 +275,7 @@ private fun QueueSongRow(
     Surface(
         shape = RoundedCornerShape(18.dp),
         color = Color(0xFF141414),
-        border = if (isPlaying) androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEFB4E0).copy(alpha = 0.5f)) else null,
+        border = if (isPlaying) BorderStroke(1.dp, Color(0xFFEFB4E0).copy(alpha = 0.5f)) else null,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -310,14 +311,13 @@ private fun QueueSongRow(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = song.title.lowercase(),
+                    text = song.title,
                     style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Black,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     ),
                     color = if (isPlaying) Color(0xFFEFB4E0) else Color.White,
                     maxLines = 1,
-                    letterSpacing = (-0.8).sp,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(

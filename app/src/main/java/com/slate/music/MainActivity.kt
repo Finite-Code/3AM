@@ -37,8 +37,12 @@ import kotlinx.coroutines.delay
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import com.slate.music.Heart.HeartEngine
 import androidx.compose.runtime.collectAsState
+import com.slate.music.data.HeartEngine
+import com.slate.music.data.ListeningStatsManager
+import com.slate.music.data.PlaylistManager
+import com.slate.music.ui.HomeScreen
+import com.slate.music.util.performHapticClick
 import com.slate.music.amp.*
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -132,7 +136,7 @@ fun WelcomeScreen(onAnimationFinished: () -> Unit = {}) {
     LaunchedEffect(Unit) {
         delay(100)
         isAppReady = true
-        delay(2000) // Minimum time to show splash
+        delay(800) // Minimum time to show splash
         minSplashTimeReached = true
     }
 
@@ -160,7 +164,7 @@ fun WelcomeScreen(onAnimationFinished: () -> Unit = {}) {
                 LaunchedEffect(isAppReady) {
                     if (isAppReady) {
                         for (i in 1..headline.length) {
-                            delay(100L)
+                            delay(80L)
                             visibleChars = i
                             try {
                                 val vib = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -205,7 +209,7 @@ fun WelcomeScreen(onAnimationFinished: () -> Unit = {}) {
                             blurAnim.animateTo(
                                 targetValue = 0f,
                                 animationSpec = tween(
-                                    durationMillis = 1600,
+                                    durationMillis = 800,
                                     easing = EaseOutCubic
                                 )
                             )
@@ -217,11 +221,11 @@ fun WelcomeScreen(onAnimationFinished: () -> Unit = {}) {
                         enter = slideInVertically(
                             initialOffsetY = { it },
                             animationSpec = tween(
-                                durationMillis = 1000,
+                                durationMillis = 600,
                                 easing = EaseOutCubic
                             )
                         ) + fadeIn(
-                            animationSpec = tween(durationMillis = 300)
+                            animationSpec = tween(durationMillis = 200)
                         )
                     ) {
                         Text(

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.slate.music
+package com.slate.music.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -31,8 +31,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.slate.music.Heart.HeartEngine
-import com.slate.music.Heart.HeartSong
+import com.slate.music.AppSettings
+import com.slate.music.data.HeartEngine
+import com.slate.music.data.HeartSong
+import com.slate.music.data.PlaylistManager
+import com.slate.music.util.DeadEndHapticHandler
+import com.slate.music.util.performHapticClick
 import com.slate.music.amp.AmpEngine
 import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.HazeProgressive
