@@ -112,6 +112,7 @@ fun AboutScreen(
             }
         }
         val versionName = packageInfo?.versionName ?: "1.0.0"
+        val cleanVersionName = versionName.substringBefore('-')
         val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             packageInfo?.longVersionCode ?: 1L
         } else {
@@ -195,7 +196,7 @@ fun AboutScreen(
                                 color = Color(0xFF242424)
                             ) {
                                 Text(
-                                    text = "v$versionName (Build $versionCode)",
+                                    text = "v$cleanVersionName • Build #$versionCode",
                                     color = Color.LightGray,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
@@ -209,6 +210,15 @@ fun AboutScreen(
                 // Diagnostics Card
                 item {
                     AboutSectionHeader(title = "System & Engine Diagnostics")
+                }
+
+                item {
+                    AboutInfoRow(
+                        icon = Icons.Rounded.Build,
+                        title = "Build & Version",
+                        subtitle = "Automated Build Counter #$versionCode",
+                        value = "v$cleanVersionName"
+                    )
                 }
 
                 item {
