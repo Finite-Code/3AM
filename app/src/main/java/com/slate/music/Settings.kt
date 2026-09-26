@@ -39,6 +39,9 @@ fun SettingsScreen(
     hazeState: HazeState,
     modifier: Modifier = Modifier
 ) {
+
+    var isAboutOpen by remember { mutableStateOf(false) }
+
     var backProgress by remember { mutableFloatStateOf(0f) }
 
     PredictiveBackHandler(enabled = isVisible) { progressFlow ->
@@ -223,12 +226,21 @@ fun SettingsScreen(
                 item {
                     SettingsItemClickable(
                         icon = Icons.Rounded.Info,
-                        title = "Build ID",
+                        title = "Build Info & Diagnostics",
                         value = "0.1.0-alpha",
-                        onClick = { /* TODO: An Easter Egg perhaps */ }
+                        onClick = {
+                            context.performHapticClick()
+                            isAboutOpen = true
+                        }
                     )
                 }
             }
+
+            AboutScreen(
+                isVisible = isAboutOpen,
+                onClose = { isAboutOpen = false },
+                hazeState = hazeState
+            )
         }
     }
 }
