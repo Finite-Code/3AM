@@ -22,6 +22,8 @@ import androidx.compose.runtime.Composable
 import coil.compose.AsyncImage
 import androidx.media3.common.Player
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -50,15 +52,20 @@ fun MusicPlayer(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(24.dp),
+            .padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = 44.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth(0.85f)
+                .fillMaxWidth(0.88f)
                 .aspectRatio(1f)
                 .clip(RoundedCornerShape(24.dp))
                 .background(Color(0xFF1E1E1E))
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onDoubleTap = { onLikeToggle() }
+                    )
+                }
         ) {
             if (!albumArtUrl.isNullOrEmpty()) {
                 AsyncImage(
@@ -74,13 +81,30 @@ fun MusicPlayer(
                         .background(Color.DarkGray)
                 )
             }
+            if (liked) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(12.dp)
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.55f))
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Favorite,
+                        contentDescription = "Liked",
+                        tint = Color.Red,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(modifier = Modifier.weight(1f)) {
@@ -107,8 +131,10 @@ fun MusicPlayer(
                 )
             }
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier.padding(bottom = 2.dp)
+            ) {
                 IconButton(onClick = onPlaylistAddToggle) {
                     Icon(
                         imageVector = Icons.Rounded.PlaylistAdd,
@@ -126,19 +152,10 @@ fun MusicPlayer(
                         modifier = Modifier.size(26.dp)
                     )
                 }
-
-                IconButton(onClick = onLikeToggle) {
-                    Icon(
-                        imageVector = if (liked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                        contentDescription = "Like",
-                        tint = if (liked) Color.Red else Color.LightGray,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Column(modifier = Modifier.fillMaxWidth()) {
             Slider(
@@ -169,14 +186,13 @@ fun MusicPlayer(
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            // Shuffle Toggle Button
             IconButton(onClick = onShuffleToggle) {
                 Icon(
                     imageVector = Icons.Rounded.Shuffle,
