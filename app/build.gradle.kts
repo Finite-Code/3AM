@@ -1,3 +1,13 @@
+import java.util.Properties
+
+val versioningFile = rootProject.file("versioning.prop")
+val versioningProps = Properties().apply {
+    if (versioningFile.exists()) {
+        versioningFile.inputStream().use { load(it) }
+    }
+}
+val currentBuildCounter = versioningProps.getProperty("build.counter")?.toIntOrNull() ?: 1
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -11,8 +21,8 @@ android {
         applicationId = "com.slate.music"
         minSdk = 33
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = currentBuildCounter
+        versionName = "1.0.0-$currentBuildCounter"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -32,6 +42,20 @@ android {
     buildFeatures {
         compose = true
     }
+}
+
+tasks.register("incrementBuildCounter"){
+    doLast {
+        val nextCounter = currentBuildCounter + 1
+        versioningProps.setProperty("build.counter", nextCounter.toString())
+        versioningFile.outputStream().use {
+            versioningProps.store(it, "Automated Build Counter")
+        }
+    }
+}
+
+tasks.matching { it.name.startsWith("assemble") || it.name.startsWith("bundle") }.configureEach {
+    finalizedBy("incrementBuildCounter")
 }
 
 dependencies {
