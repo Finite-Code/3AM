@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -47,14 +48,17 @@ import dev.chrisbanes.haze.hazeSource
 
 @Composable
 fun ListeningStatsScreen(
-    isVisible: Boolean,
+    isOpen: Boolean,
+    reveal: Float,
     onClose: () -> Unit,
     hazeState: HazeState,
     modifier: Modifier = Modifier
 ) {
-    BackHandler(enabled = isVisible) {
+    BackHandler(enabled = isOpen && reveal > 0.5f) {
         onClose()
     }
+
+    if (!isOpen && reveal <= 0f) return
 
     val lowSpringAnim = spring<IntOffset>(
         dampingRatio = Spring.DampingRatioLowBouncy,
@@ -62,7 +66,7 @@ fun ListeningStatsScreen(
     )
 
     AnimatedVisibility(
-        visible = isVisible,
+        visible = isOpen,
         enter = slideInHorizontally(
             initialOffsetX = { fullWidth -> -fullWidth },
             animationSpec = lowSpringAnim
@@ -79,7 +83,7 @@ fun ListeningStatsScreen(
 
         DeadEndHapticHandler(scrollState)
 
-        \n        \n        \n        val todayHours = statsState.todayListeningTimeMs / 1000 / 3600
+        \n        \n        \n        \n        val todayHours = statsState.todayListeningTimeMs / 1000 / 3600
         val todayMins = (statsState.todayListeningTimeMs / 1000 % 3600) / 60
 
         val weeklyHours = statsState.weeklyListeningTimeMs / 1000 / 3600
@@ -88,6 +92,9 @@ fun ListeningStatsScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .graphicsLayer {
+                    translationX = -size.width * (1f - reveal.coerceIn(0f, 1f))
+                }
                 .background(Color.Black)
         ) {
             LazyColumn(
@@ -328,14 +335,13 @@ fun ListeningStatsScreen(
 
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = song.title.lowercase(),
+                                        text = song.title,
                                         style = MaterialTheme.typography.titleMedium.copy(
-                                            fontWeight = FontWeight.Black,
+                                            fontWeight = FontWeight.Bold,
                                             fontSize = 16.sp
                                         ),
                                         color = Color.White,
                                         maxLines = 1,
-                                        letterSpacing = (-0.8).sp,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(

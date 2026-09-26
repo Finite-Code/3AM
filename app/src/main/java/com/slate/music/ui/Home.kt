@@ -3,6 +3,7 @@
 package com.slate.music.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -24,8 +25,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import kotlinx.coroutines.launch
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -177,19 +180,69 @@ fun HomeScreen() {
     var isStatsOpen by remember { mutableStateOf(false) }
     var isQueueOpen by remember { mutableStateOf(false) }
 
+    val config = LocalConfiguration.current
+    val screenWidthPx = with(density) { config.screenWidthDp.dp.toPx() }
+
+    val dragAnim = remember { Animatable(0f) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(isStatsOpen) {
+        val target = if (isStatsOpen) screenWidthPx else 0f
+        if (dragAnim.value != target) {
+            dragAnim.animateTo(
+                targetValue = target,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioLowBouncy,
+                    stiffness = Spring.StiffnessMediumLow
+                )
+            )
+        }
+    }
+
     Scaffold(
         containerColor = Color.Black
     ) { scaffoldPadding ->
         Box(
+
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = scaffoldPadding.calculateBottomPadding())
-                .pointerInput(Unit) {
-                    detectHorizontalDragGestures { _, dragAmount ->
-                        if (dragAmount > 40f && !isStatsOpen && !isSearchOpen && !isPlayerSheetVisible) {
-                            context.performHapticClick()
-                            isStatsOpen = true
-                        }
+                .pointerInput(isStatsOpen, isSearchOpen, isPlayerSheetVisible) {
+                    if (!isSearchOpen && !isPlayerSheetVisible) {
+                        detectHorizontalDragGestures(
+                            onDragStart = {
+                                if (!isStatsOpen) context.performHapticClick()
+                            },
+                            onHorizontalDrag = { change, dragAmount ->
+                                change.consume()
+                                coroutineScope.launch {
+                                    val newOffset = (dragAnim.value + dragAmount).coerceIn(0f, screenWidthPx)
+                                    dragAnim.snapTo(newOffset)
+                                }
+                            },
+                            onDragEnd = {
+                                coroutineScope.launch {
+                                    // If dragged past 25% of the screen width, snap open, else snap back
+                                    val shouldOpen = dragAnim.value > screenWidthPx * 0.25f
+                                    val targetOffset = if (shouldOpen) screenWidthPx else 0f
+
+                                    dragAnim.animateTo(
+                                        targetValue = targetOffset,
+                                        animationSpec = spring(
+                                            dampingRatio = Spring.DampingRatioLowBouncy,
+                                            stiffness = Spring.StiffnessLow
+                                        )
+                                    )
+                                    isStatsOpen = shouldOpen
+                                }
+                            },
+                            onDragCancel = {
+                                coroutineScope.launch {
+                                    val targetOffset = if (isStatsOpen) screenWidthPx else 0f
+                                    dragAnim.animateTo(targetOffset)
+                                }
+                            }
+                        )
                     }
                 }
         ) {
@@ -289,8 +342,20 @@ fun HomeScreen() {
             )
 
             ListeningStatsScreen(
-                isVisible = isStatsOpen,
-                onClose = { isStatsOpen = false },
+                isOpen = dragAnim.value > 0f,
+                reveal = dragAnim.value / screenWidthPx,
+                onClose = {
+                    coroutineScope.launch {
+                        dragAnim.animateTo(
+                            targetValue = 0f,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                stiffness = Spring.StiffnessLow
+                            )
+                        )
+                        isStatsOpen = false
+                    }
+                },
                 hazeState = hazeState
             )
 
