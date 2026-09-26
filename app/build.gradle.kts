@@ -56,9 +56,9 @@ tasks.matching { it.name.startsWith("assemble") || it.name.startsWith("bundle") 
 }
 
 dependencies {
-    implementation("io.coil-kt:coil-compose:2.6.0")
-    implementation("dev.chrisbanes.haze:haze:2.0.0-beta02")
-    implementation("dev.chrisbanes.haze:haze-blur:2.0.0-beta02")
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("dev.chrisbanes.haze:haze:2.0.0")
+    implementation("dev.chrisbanes.haze:haze-blur:2.0.0")
     implementation(libs.androidx.compose.animation.core)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -77,7 +77,7 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    implementation("androidx.compose.material3:material3:1.5.0-alpha02")
-    implementation("androidx.media3:media3-exoplayer:1.5.1")
-    implementation("androidx.media3:media3-session:1.5.1")
+    implementation("androidx.compose.material3:material3:1.5.0-alpha29")
+    implementation("androidx.media3:media3-exoplayer:1.11.1")
+    implementation("androidx.media3:media3-session:1.11.1")
 }
