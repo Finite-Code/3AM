@@ -94,6 +94,16 @@ fun SettingsScreen(
         val scale = 1f - (backProgress * 0.16f)
         val cornerRadius = (backProgress * 32).dp
 
+        val packageInfo = remember(context) {
+            try {
+                context.packageManager.getPackageInfo(context.packageName, 0)
+            } catch (_: Exception) {
+                null
+            }
+        }
+        val versionName = packageInfo?.versionName ?: "1.0.0"
+        val cleanVersionName = versionName.substringBefore('-')
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -226,8 +236,8 @@ fun SettingsScreen(
                 item {
                     SettingsItemClickable(
                         icon = Icons.Rounded.Info,
-                        title = "Build Info & Diagnostics",
-                        value = "0.1.0-alpha",
+                        title = "About?",
+                        value = "v$cleanVersionName",
                         onClick = {
                             context.performHapticClick()
                             isAboutOpen = true

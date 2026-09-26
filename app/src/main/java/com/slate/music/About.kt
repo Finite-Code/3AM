@@ -47,20 +47,16 @@ import kotlinx.coroutines.CancellationException
 fun AboutScreen(
     isVisible: Boolean,
     onClose: () -> Unit,
-    hazeState: HazeState,
+    
     modifier: Modifier = Modifier
 ) {
     var backProgress by remember { mutableFloatStateOf(0f) }
 
     PredictiveBackHandler(enabled = isVisible) { progressFlow ->
-        try {
-            progressFlow.collect { backEvent ->
-                backProgress = backEvent.progress
-            }
-            onClose()
-        } catch (_: CancellationException) {
-            backProgress = 0f
+        progressFlow.collect { backEvent ->
+            backProgress = backEvent.progress
         }
+        onClose()
     }
 
     LaunchedEffect(isVisible) {
@@ -70,8 +66,8 @@ fun AboutScreen(
     }
 
     val lowSpringAnim = spring<IntOffset>(
-        dampingRatio = Spring.DampingRatioLowBouncy,
-        stiffness = Spring.StiffnessLow
+        dampingRatio = 0.8f,
+        stiffness = 300f
     )
 
     val localHazeState = remember { HazeState() }
@@ -112,6 +108,7 @@ fun AboutScreen(
             }
         }
         val versionName = packageInfo?.versionName ?: "1.0.0"
+        val cleanVersionName = versionName.substringBefore('-')
         val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             packageInfo?.longVersionCode ?: 1L
         } else {
@@ -195,7 +192,7 @@ fun AboutScreen(
                                 color = Color(0xFF242424)
                             ) {
                                 Text(
-                                    text = "v$versionName (Build $versionCode)",
+                                    text = "v$cleanVersionName • Build #$versionCode",
                                     color = Color.LightGray,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
@@ -208,56 +205,65 @@ fun AboutScreen(
 
                 // Diagnostics Card
                 item {
-                    AboutSectionHeader(title = "System & Engine Diagnostics")
+                    AboutSectionHeader(title = "app info")
                 }
 
                 item {
-                    AboutInfoRow(
+                    AboutRow(
+                        icon = Icons.Rounded.Build,
+                        title = "Build & Version",
+                        subtitle = "build #$versionCode",
+                        value = "v$cleanVersionName"
+                    )
+                }
+
+                item {
+                    AboutRow(
                         icon = Icons.Rounded.GraphicEq,
                         title = "Audio Engine",
-                        subtitle = "Jetpack Media3 (ExoPlayer 1.5.1)",
+                        subtitle = "media3 exoplayer",
                         value = if (ampState.isPlaying) "Playing" else "Ready"
                     )
                 }
 
                 item {
-                    AboutInfoRow(
+                    AboutRow(
                         icon = Icons.Rounded.Equalizer,
-                        title = "DSP Audio Effects",
-                        subtitle = "AmpEqualizer 5-Band EQ & Bass Boost",
+                        title = "dsp engine",
+                        subtitle = "equalizer & bass boost",
                         value = if (eqState.isEnabled) "Active" else "Disabled"
                     )
                 }
 
                 item {
-                    AboutInfoRow(
+                    AboutRow(
                         icon = Icons.Rounded.LibraryMusic,
-                        title = "Scanned Library",
+                        title = "library",
                         subtitle = "${songs.size} songs (${totalHours}h ${totalMins}m total)",
                         value = if (isScanning) "Scanning..." else "Synced"
                     )
                 }
 
                 item {
-                    AboutInfoRow(
+                    AboutRow(
                         icon = Icons.Rounded.PhoneAndroid,
-                        title = "Android Environment",
+                        title = "device",
                         subtitle = "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})",
-                        value = "Target 37"
+                        value = "api 37"
                     )
                 }
 
                 // Actions Card
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
-                    AboutSectionHeader(title = "Tools & Actions")
+                    AboutSectionHeader(title = "actions")
                 }
 
                 item {
-                    AboutActionRow(
+                    AboutRow(
                         icon = Icons.Rounded.Sync,
-                        title = "Rescan Music Library",
-                        subtitle = "Force MediaStore scan for new audio files",
+                        title = "rescan library",
+                        subtitle = "look for new music",
                         onClick = {
                             context.performHapticClick()
                             HeartEngine.scanNow()
@@ -266,10 +272,10 @@ fun AboutScreen(
                 }
 
                 item {
-                    AboutActionRow(
+                    AboutRow(
                         icon = Icons.Rounded.Code,
-                        title = "GitHub Repository",
-                        subtitle = "Finite-Code / 3AM (Open Source GPL-3.0)",
+                        title = "source code",
+                        subtitle = "github repo",
                         onClick = {
                             context.performHapticClick()
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Finite-Code/3AM"))
@@ -279,10 +285,10 @@ fun AboutScreen(
                 }
 
                 item {
-                    AboutActionRow(
+                    AboutRow(
                         icon = Icons.Rounded.RestartAlt,
-                        title = "Reset App Preferences",
-                        subtitle = "Restore default settings & clear caches",
+                        title = "reset settings",
+                        subtitle = "clear all app data",
                         onClick = {
                             context.performHapticClick()
                             val prefs = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
@@ -396,7 +402,7 @@ private fun AboutSectionHeader(title: String) {
 }
 
 @Composable
-private fun AboutInfoRow(
+private fun AboutRow(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
     subtitle: String,
@@ -456,7 +462,7 @@ private fun AboutInfoRow(
 }
 
 @Composable
-private fun AboutActionRow(
+private fun AboutRow(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
     subtitle: String,
@@ -511,6 +517,87 @@ private fun AboutActionRow(
                 tint = Color.Gray,
                 modifier = Modifier.size(20.dp)
             )
+        }
+    }
+}@Composable
+private fun AboutSectionHeader(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.labelMedium,
+        color = Color.LightGray.copy(alpha = 0.88f),
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 13.sp,
+        modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 4.dp)
+    )
+}
+
+@Composable
+private fun AboutRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    value: String? = null,
+    onClick: (() -> Unit)? = null
+) {
+    Surface(
+        shape = RoundedCornerShape(18.dp),
+        color = Color(0xFF141414),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.06f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = subtitle,
+                    color = Color.Gray,
+                    fontSize = 12.sp
+                )
+            }
+
+            if (value != null) {
+                Text(
+                    text = value,
+                    color = Color.LightGray,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            } else if (onClick != null) {
+                Icon(
+                    imageVector = Icons.Rounded.ChevronRight,
+                    contentDescription = null,
+                    tint = Color.Gray,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
