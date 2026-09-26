@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import coil.compose.AsyncImage
 import androidx.media3.common.Player
+import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -42,6 +43,7 @@ fun MusicPlayer(
     onLikeToggle: () -> Unit,
     onShuffleToggle: () -> Unit,
     onRepeatToggle: () -> Unit,
+    onQueueToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -104,13 +106,24 @@ fun MusicPlayer(
                 )
             }
 
-            IconButton(onClick = onLikeToggle) {
-                Icon(
-                    imageVector = if (liked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                    contentDescription = "Like",
-                    tint = if (liked) Color.Red else Color.LightGray,
-                    modifier = Modifier.size(28.dp)
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onQueueToggle) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.QueueMusic,
+                        contentDescription = "Playing Queue",
+                        tint = Color.LightGray,
+                        modifier = Modifier.size(26.dp)
+                    )
+                }
+
+                IconButton(onClick = onLikeToggle) {
+                    Icon(
+                        imageVector = if (liked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                        contentDescription = "Like",
+                        tint = if (liked) Color.Red else Color.LightGray,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
         }
 

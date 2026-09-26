@@ -159,6 +159,7 @@ fun HomeScreen() {
 
     var isSearchOpen by remember { mutableStateOf(false) }
     var isStatsOpen by remember { mutableStateOf(false) }
+    var isQueueOpen by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = Color.Black
@@ -319,6 +320,12 @@ fun HomeScreen() {
                 hazeState = hazeState
             )
 
+            QueueSheet(
+                isVisible = isQueueOpen,
+                onClose = { isQueueOpen = false },
+                hazeState = hazeState
+            )
+
             if (isPlayerSheetVisible && (selectedTrack != null || ampState.currentSong != null)) {
                 ModalBottomSheet(
                     onDismissRequest = {
@@ -347,8 +354,6 @@ fun HomeScreen() {
                     } else {
                         0f
                     }
-
-                    // Inside ModalBottomSheet in Home.kt:
 
                     MusicPlayer(
                         title = title,
@@ -384,6 +389,10 @@ fun HomeScreen() {
                         onRepeatToggle = {
                             context.performHapticClick()
                             AmpEngine.toggleRepeatMode()
+                        },
+                        onQueueToggle = {
+                            context.performHapticClick()
+                            isQueueOpen = true
                         },
                         onLikeToggle = {
                             context.performHapticClick()
