@@ -44,6 +44,7 @@ fun MusicPlayer(
     onShuffleToggle: () -> Unit,
     onRepeatToggle: () -> Unit,
     onQueueToggle: () -> Unit,
+    onPlaylistAddToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -107,6 +108,16 @@ fun MusicPlayer(
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
+
+                IconButton(onClick = onPlaylistAddToggle) {
+                    Icon(
+                        imageVector = Icons.Rounded.PlaylistAdd,
+                        contentDescription = "Add to Playlist",
+                        tint = Color.LightGray,
+                        modifier = Modifier.size(26.dp)
+                    )
+                }
+
                 IconButton(onClick = onQueueToggle) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.QueueMusic,
