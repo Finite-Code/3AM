@@ -45,6 +45,7 @@ android {
 }
 
 tasks.register("incrementBuildCounter"){
+    description = "Changes build count on every succesful build."
     doLast {
         val nextCounter = currentBuildCounter + 1
         versioningFile.writeText("build.counter=$nextCounter\n")
