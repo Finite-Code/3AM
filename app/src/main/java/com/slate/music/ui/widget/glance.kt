@@ -1,6 +1,5 @@
 package com.slate.music.ui.widget
 
-import com.slate.music.ui.widget.GlanceWidget
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -55,7 +54,7 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.action.actionStartActivity
 import com.slate.music.MainActivity
 
-// Glance Wigdet & Responsive Size - Pass 3
+// Glance Widget & Responsive Size - Pass 3
 
 class GlanceWidget : GlanceAppWidget() {
 
@@ -123,420 +122,10 @@ class GlanceWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = GlanceWidget()
 }
 
-// Size Wise Composables
-
-/**
- * 1x1 Controller (Play/Pause Toggle Button)
- */
-@Composable
-private fun Compact1x1Widget(state: AmpState) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = GlanceModifier
-            .fillMaxSize()
-            .background(Color(0xFF000000))
-            .cornerRadius(18.dp)
-            .clickable(actionRunCallback<TogglePlayPauseAction>())
-    ) {
-        Image(
-            provider = ImageProvider(
-                if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play
-            ),
-            contentDescription = if (state.isPlaying) "Pause" else "Play",
-            modifier = GlanceModifier.size(32.dp)
-        )
-    }
-}
-
-/**
- * 2x2 Widget (Album Art, Metadata & Controls)
- */
-@Composable
-private fun Square2x2Widget(state: AmpState, isLiked: Boolean) {
-    val song = state.currentSong
-
-    Column(
-        modifier = GlanceModifier.fillMaxSize()
-    ) {
-        // Thumbnail Box
-        Box(
-            modifier = GlanceModifier
-                .fillMaxWidth()
-                .height(90.dp)
-                .background(Color(0xFF242424))
-                .cornerRadius(16.dp)
-                .clickable(actionRunCallback<AlbumDTAction>()),
-            contentAlignment = Alignment.Center
-        ) {
-            AlbumArtImage(
-                uriString = song?.albumArtUri,
-                modifier = GlanceModifier.fillMaxSize()
-            )
-
-            if (isLiked) {
-                Box(
-                    modifier = GlanceModifier
-                        .fillMaxSize()
-                        .padding(8.dp),
-                    contentAlignment = Alignment.TopEnd
-                ) {
-                    Image(
-                        provider = ImageProvider(R.drawable.ic_heart_filled),
-                        contentDescription = "Liked",
-                        modifier = GlanceModifier.size(18.dp)
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = GlanceModifier.height(6.dp))
-
-        // Title & Artist
-        Column(modifier = GlanceModifier.fillMaxWidth()) {
-            Text(
-                text = song?.title?.lowercase() ?: "3am music",
-                style = TextStyle(
-                    color = ColorProvider(day = Color(0xFFFFFFFF), night = Color(0xFFFFFFFF)),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                maxLines = 1
-            )
-            Text(
-                text = song?.artist ?: "no track playing",
-                style = TextStyle(
-                    color = ColorProvider(day = Color(0xFFA0A0A0), night = Color(0xFFA0A0A0)),
-                    fontSize = 11.sp
-                ),
-                maxLines = 1
-            )
-        }
-
-        Spacer(modifier = GlanceModifier.height(6.dp))
-
-        // Playback Controls Row
-        Row(
-            modifier = GlanceModifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                provider = ImageProvider(R.drawable.ic_skip_previous),
-                contentDescription = "Previous",
-                modifier = GlanceModifier
-                    .size(28.dp)
-                    .clickable(actionRunCallback<SkipPreviousAction>())
-            )
-
-            Spacer(modifier = GlanceModifier.width(16.dp))
-
-            Image(
-                provider = ImageProvider(
-                    if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play
-                ),
-                contentDescription = "Play/Pause",
-                modifier = GlanceModifier
-                    .size(32.dp)
-                    .clickable(actionRunCallback<TogglePlayPauseAction>())
-            )
-
-            Spacer(modifier = GlanceModifier.width(16.dp))
-
-            Image(
-                provider = ImageProvider(R.drawable.ic_skip_next),
-                contentDescription = "Next",
-                modifier = GlanceModifier
-                    .size(28.dp)
-                    .clickable(actionRunCallback<SkipNextAction>())
-            )
-        }
-    }
-}
-
-/**
- * 4x2 Widget -  Horizontal Media Bar
- */
-@Composable
-private fun Medium4x2Widget(state: AmpState, isLiked: Boolean) {
-    val song = state.currentSong
-    val progressFraction = if (state.durationMs > 0) {
-        (state.progressMs.toFloat() / state.durationMs).coerceIn(0f, 1f)
-    } else 0f
-
-    Column(
-        modifier = GlanceModifier
-            .fillMaxSize()
-            .background(Color(0xFF000000))
-            .cornerRadius(20.dp)
-            .padding(10.dp)
-    ) {
-        Row(
-            modifier = GlanceModifier
-                .fillMaxWidth()
-                .defaultWeight(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Album Art
-            Box(
-                modifier = GlanceModifier
-                    .size(54.dp)
-                    .background(Color(0xFF282828))
-                    .cornerRadius(12.dp)
-                    .clickable(actionRunCallback<AlbumDTAction>())
-            ) {
-                AlbumArtImage(
-                    uriString = song?.albumArtUri,
-                    modifier = GlanceModifier.fillMaxSize()
-                )
-            }
-
-            Spacer(modifier = GlanceModifier.width(12.dp))
-
-            // Title & Artist
-            Column(modifier = GlanceModifier.defaultWeight()) {
-                Text(
-                    text = song?.title?.lowercase() ?: "3am music",
-                    style = TextStyle(
-                        color = ColorProvider(day = Color(0xFFFFFFFF), night = Color(0xFFFFFFFF)),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    maxLines = 1
-                )
-                Text(
-                    text = song?.artist ?: "select a song to start",
-                    style = TextStyle(
-                        color = ColorProvider(day = Color(0xFFCCCCCC), night = Color(0xFFCCCCCC)),
-                        fontSize = 12.sp
-                    ),
-                    maxLines = 1
-                )
-            }
-
-            // Controls
-            Row(verticalAlignment = Alignment.CenterVertically) {
-
-                Image(
-                    provider = ImageProvider(R.drawable.ic_skip_previous),
-                    contentDescription = "Previous",
-                    modifier = GlanceModifier
-                        .size(28.dp)
-                        .clickable(actionRunCallback<SkipPreviousAction>())
-                )
-
-                Spacer(modifier = GlanceModifier.width(10.dp))
-
-                Image(
-                    provider = ImageProvider(
-                        if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play
-                    ),
-                    contentDescription = "Play/Pause",
-                    modifier = GlanceModifier
-                        .size(36.dp)
-                        .clickable(actionRunCallback<TogglePlayPauseAction>())
-                )
-
-                Spacer(modifier = GlanceModifier.width(10.dp))
-
-                Image(
-                    provider = ImageProvider(R.drawable.ic_skip_next),
-                    contentDescription = "Next",
-                    modifier = GlanceModifier
-                        .size(28.dp)
-                        .clickable(actionRunCallback<SkipNextAction>())
-                )
-            }
-        }
-
-        Spacer(modifier = GlanceModifier.height(8.dp))
-
-        WidgetProgressBar(
-            progressFraction = progressFraction,
-            modifier = GlanceModifier.fillMaxWidth().height(4.dp)
-        )
-    }
-}
-
-/**
- * A comprehensive 4x4 Dashboard Widget containing full configuration controls.
- *
- * # Experimental Feature:
- * > **Night Mode Indicator:** Under active evaluation. Might require layout optimization
- *   for smaller mobile viewports.
- *
- * TODO: (Experimental) Finalize Night Mode Indicator design before final 3AM push.
- */
-@Composable
-private fun Large4x4DashboardWidget(state: AmpState, isLiked: Boolean) {
-    val song = state.currentSong
-    val curSecs = state.progressMs / 1000
-    val durSecs = state.durationMs / 1000
-    val currentPosText = String.format("%d:%02d", curSecs / 60, curSecs % 60)
-    val durationText = String.format("%d:%02d", durSecs / 60, durSecs % 60)
-
-    val progressFraction = if (state.durationMs > 0) {
-        (state.progressMs.toFloat() / state.durationMs).coerceIn(0f, 1f)
-    } else 0f
-
-    Column(
-        modifier = GlanceModifier
-            .fillMaxSize()
-            .background(Color(0xFF000000))
-            .cornerRadius(24.dp)
-            .padding(16.dp)
-    ) {
-
-        // Large Album Art Box
-        Box(
-            modifier = GlanceModifier
-                .fillMaxWidth()
-                .height(130.dp)
-                .background(Color(0xFF222222))
-                .cornerRadius(18.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            AlbumArtImage(
-                uriString = song?.albumArtUri,
-                modifier = GlanceModifier.fillMaxSize()
-            )
-        }
-
-        Spacer(modifier = GlanceModifier.height(12.dp))
-
-        Row(
-            modifier = GlanceModifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = GlanceModifier.defaultWeight()) {
-                Text(
-                    text = song?.title?.lowercase() ?: "no track playing",
-                    style = TextStyle(
-                        color = ColorProvider(day = Color(0xFFFFFFFF), night = Color(0xFFFFFFFF)),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    maxLines = 1
-                )
-                Text(
-                    text = song?.artist ?: "open 3AM to play music",
-                    style = TextStyle(
-                        color = ColorProvider(day = Color(0xFF888888), night = Color(0xFF888888)),
-                        fontSize = 13.sp
-                    ),
-                    maxLines = 1
-                )
-            }
-
-            Spacer(modifier = GlanceModifier.width(8.dp))
-
-            Image(
-                provider = ImageProvider(
-                    if (isLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart
-                ),
-                contentDescription = "Favorite",
-                modifier = GlanceModifier
-                    .size(24.dp)
-                    .clickable(actionRunCallback<ToggleFavoriteAction>())
-            )
-        }
-
-        Spacer(modifier = GlanceModifier.height(10.dp))
-
-        // Progress Bar
-        Column(modifier = GlanceModifier.fillMaxWidth()) {
-            WidgetProgressBar(
-                progressFraction = progressFraction,
-                modifier = GlanceModifier.fillMaxWidth().height(4.dp)
-            )
-
-            Spacer(modifier = GlanceModifier.height(4.dp))
-
-            Row(
-                modifier = GlanceModifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = currentPosText,
-                    style = TextStyle(color = ColorProvider(day = Color(0xFFA0A0A0), night = Color(0xFFA0A0A0)), fontSize = 10.sp)
-                )
-                Spacer(modifier = GlanceModifier.defaultWeight())
-                Text(
-                    text = durationText,
-                    style = TextStyle(color = ColorProvider(day = Color(0xFFA0A0A0), night = Color(0xFFA0A0A0)), fontSize = 10.sp)
-                )
-            }
-        }
-
-        Spacer(modifier = GlanceModifier.height(12.dp))
-
-        Row(
-            modifier = GlanceModifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                provider = ImageProvider(android.R.drawable.ic_menu_rotate),
-                contentDescription = "Shuffle",
-                modifier = GlanceModifier
-                    .size(22.dp)
-                    .clickable(actionRunCallback<ToggleShuffleAction>())
-            )
-
-            Spacer(modifier = GlanceModifier.defaultWeight())
-
-            Image(
-                provider = ImageProvider(R.drawable.ic_skip_previous),
-                contentDescription = "Previous",
-                modifier = GlanceModifier
-                    .size(28.dp)
-                    .clickable(actionRunCallback<SkipPreviousAction>())
-            )
-
-            Spacer(modifier = GlanceModifier.defaultWeight())
-
-            Box(
-                modifier = GlanceModifier
-                    .size(48.dp)
-                    .background(Color(0xFFFFFFFF))
-                    .cornerRadius(24.dp)
-                    .clickable(actionRunCallback<TogglePlayPauseAction>()),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    provider = ImageProvider(
-                        if (state.isPlaying) R.drawable.ic_pause_black else R.drawable.ic_play_black
-                    ),
-                    contentDescription = "Play/Pause",
-                    modifier = GlanceModifier.size(28.dp)
-                )
-            }
-
-            Spacer(modifier = GlanceModifier.defaultWeight())
-
-            Image(
-                provider = ImageProvider(R.drawable.ic_skip_next),
-                contentDescription = "Next",
-                modifier = GlanceModifier
-                    .size(28.dp)
-                    .clickable(actionRunCallback<SkipNextAction>())
-            )
-
-            Spacer(modifier = GlanceModifier.defaultWeight())
-
-            Image(
-                provider = ImageProvider(android.R.drawable.ic_menu_revert),
-                contentDescription = "Repeat",
-                modifier = GlanceModifier
-                    .size(22.dp)
-                    .clickable(actionRunCallback<ToggleRepeatAction>())
-            )
-        }
-    }
-}
-
 // Helper Components
 
 @Composable
-private fun AlbumArtImage(uriString: String?, modifier: GlanceModifier = GlanceModifier) {
+fun AlbumArtImage(uriString: String?, modifier: GlanceModifier = GlanceModifier) {
     val context = LocalContext.current
     val bitmap: Bitmap? = uriString?.let { uri ->
         try {
@@ -571,7 +160,7 @@ private fun AlbumArtImage(uriString: String?, modifier: GlanceModifier = GlanceM
 }
 
 @Composable
-private fun WidgetProgressBar(progressFraction: Float, modifier: GlanceModifier = GlanceModifier) {
+fun WidgetProgressBar(progressFraction: Float, modifier: GlanceModifier = GlanceModifier) {
     LinearProgressIndicator(
         progress = progressFraction.coerceIn(0f, 1f),
         modifier = modifier.fillMaxWidth().height(2.dp),
@@ -687,3 +276,74 @@ private fun EmptyWidget() {
         )
     }
 }
+
+/**
+ * ## NOTE
+ * A proposed volume thingy, but now I think maybe, it's useless. Also broken code below
+ */
+
+/*
+class VolumeUpAction : ActionCallback {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager.adjustStreamVolume(
+            AudioManager.STREAM_MUSIC,
+            AudioManager.ADJUST_RAISE,
+            AudioManager.FLAG_SHOW_UI
+        )
+    }
+}
+
+class VolumeDownAction : ActionCallback {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager.adjustStreamVolume(
+            AudioManager.STREAM_MUSIC,
+            AudioManager.ADJUST_LOWER,
+            AudioManager.FLAG_SHOW_UI
+        )
+    }
+}
+
+@Composable
+fun WidgetVolumeControls(modifier: GlanceModifier = GlanceModifier) {
+    Row(
+        modifier = modifier
+            .background(Color(0xFF222222))
+            .cornerRadius(24.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = GlanceModifier.size(32.dp).background(Color(0xFF333333))
+                .cornerRadius(16.dp).clickable(actionRunCallback<VolumeDownAction>()),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("-", style = TextStyle(color = ColorProvider(Color.White), fontSize = 18.sp))
+        }
+
+        Spacer(modifier = GlanceModifier.width(16.dp))
+
+        Text(
+            text = "VOL",
+            style = TextStyle(
+                color = ColorProvider(Color(0xFFA0A0A0)),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
+        )
+
+        Spacer(modifier = GlanceModifier.width(16.dp))
+
+        Box(
+            modifier = GlanceModifier.size(32.dp).background(Color(0xFF333333))
+                .cornerRadius(16.dp).clickable(actionRunCallback<VolumeUpAction>()),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("+", style = TextStyle(color = ColorProvider(Color.White), fontSize = 18.sp))
+        }
+    }
+}
+
+*/
