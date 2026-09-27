@@ -158,7 +158,8 @@ private fun Square2x2Widget(state: AmpState, isLiked: Boolean) {
                 .fillMaxWidth()
                 .height(90.dp)
                 .background(Color(0xFF242424))
-                .cornerRadius(16.dp),
+                .cornerRadius(16.dp)
+                .clickable(actionRunCallback<AlbumDTAction>()),
             contentAlignment = Alignment.Center
         ) {
             AlbumArtImage(
@@ -275,6 +276,7 @@ private fun Medium4x2Widget(state: AmpState, isLiked: Boolean) {
                     .size(54.dp)
                     .background(Color(0xFF282828))
                     .cornerRadius(12.dp)
+                    .clickable(actionRunCallback<AlbumDTAction>())
             ) {
                 AlbumArtImage(
                     uriString = song?.albumArtUri,
@@ -307,17 +309,6 @@ private fun Medium4x2Widget(state: AmpState, isLiked: Boolean) {
 
             // Controls
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    provider = ImageProvider(
-                        if (isLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart
-                    ),
-                    contentDescription = "Favorite",
-                    modifier = GlanceModifier
-                        .size(24.dp)
-                        .clickable(actionRunCallback<ToggleFavoriteAction>())
-                )
-
-                Spacer(modifier = GlanceModifier.width(12.dp))
 
                 Image(
                     provider = ImageProvider(R.drawable.ic_skip_previous),
@@ -641,5 +632,25 @@ suspend fun updateGlanceWidgets(context: Context){
         }
     } catch(e: Exception){
         // just do it. (checkmark)
+    }
+}
+
+class AlbumDTAction: ActionCallback{
+    companion object{
+        private var lastClickTime = 0L
+    }
+
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        val currentTime = System.currentTimeMillis()
+
+        if(currentTime - lastClickTime > 400){
+            AmpEngine.state.value.currentSong?.id?.toString()?.let{ trackId ->
+                AppSettings.toggleFavorite(context, trackId)
+            }
+            GlanceWidget().update(context, glanceId)
+            lastClickTime = 0L // resets the time btw
+        } else{
+            lastClickTime = currentTime // for first tap
+        }
     }
 }
