@@ -1,0 +1,8 @@
+# Web / Node.js
+node_modules/
+dist/
+out/
+.env
+.env.local
+.env.*.local
+.pnp.*
