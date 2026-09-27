@@ -134,7 +134,7 @@ private fun Compact1x1Widget(state: AmpState) {
     ) {
         Image(
             provider = ImageProvider(
-                if (state.isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
+                if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play
             ),
             contentDescription = if (state.isPlaying) "Pause" else "Play",
             modifier = GlanceModifier.size(32.dp)
@@ -214,7 +214,7 @@ private fun Square2x2Widget(state: AmpState, isLiked: Boolean) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                provider = ImageProvider(android.R.drawable.ic_media_previous),
+                provider = ImageProvider(R.drawable.ic_skip_previous),
                 contentDescription = "Previous",
                 modifier = GlanceModifier
                     .size(28.dp)
@@ -225,7 +225,7 @@ private fun Square2x2Widget(state: AmpState, isLiked: Boolean) {
 
             Image(
                 provider = ImageProvider(
-                    if (state.isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
+                    if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play
                 ),
                 contentDescription = "Play/Pause",
                 modifier = GlanceModifier
@@ -236,7 +236,7 @@ private fun Square2x2Widget(state: AmpState, isLiked: Boolean) {
             Spacer(modifier = GlanceModifier.width(16.dp))
 
             Image(
-                provider = ImageProvider(android.R.drawable.ic_media_next),
+                provider = ImageProvider(R.drawable.ic_skip_next),
                 contentDescription = "Next",
                 modifier = GlanceModifier
                     .size(28.dp)
@@ -320,7 +320,7 @@ private fun Medium4x2Widget(state: AmpState, isLiked: Boolean) {
                 Spacer(modifier = GlanceModifier.width(12.dp))
 
                 Image(
-                    provider = ImageProvider(android.R.drawable.ic_media_previous),
+                    provider = ImageProvider(R.drawable.ic_skip_previous),
                     contentDescription = "Previous",
                     modifier = GlanceModifier
                         .size(28.dp)
@@ -331,7 +331,7 @@ private fun Medium4x2Widget(state: AmpState, isLiked: Boolean) {
 
                 Image(
                     provider = ImageProvider(
-                        if (state.isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
+                        if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play
                     ),
                     contentDescription = "Play/Pause",
                     modifier = GlanceModifier
@@ -342,7 +342,7 @@ private fun Medium4x2Widget(state: AmpState, isLiked: Boolean) {
                 Spacer(modifier = GlanceModifier.width(10.dp))
 
                 Image(
-                    provider = ImageProvider(android.R.drawable.ic_media_next),
+                    provider = ImageProvider(R.drawable.ic_skip_next),
                     contentDescription = "Next",
                     modifier = GlanceModifier
                         .size(28.dp)
@@ -487,10 +487,10 @@ private fun Large4x4DashboardWidget(state: AmpState, isLiked: Boolean) {
             Spacer(modifier = GlanceModifier.defaultWeight())
 
             Image(
-                provider = ImageProvider(android.R.drawable.ic_media_previous),
+                provider = ImageProvider(R.drawable.ic_skip_previous),
                 contentDescription = "Previous",
                 modifier = GlanceModifier
-                    .size(30.dp)
+                    .size(28.dp)
                     .clickable(actionRunCallback<SkipPreviousAction>())
             )
 
@@ -506,7 +506,7 @@ private fun Large4x4DashboardWidget(state: AmpState, isLiked: Boolean) {
             ) {
                 Image(
                     provider = ImageProvider(
-                        if (state.isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
+                        if (state.isPlaying) R.drawable.ic_pause_black else R.drawable.ic_play_black
                     ),
                     contentDescription = "Play/Pause",
                     modifier = GlanceModifier.size(28.dp)
@@ -516,10 +516,10 @@ private fun Large4x4DashboardWidget(state: AmpState, isLiked: Boolean) {
             Spacer(modifier = GlanceModifier.defaultWeight())
 
             Image(
-                provider = ImageProvider(android.R.drawable.ic_media_next),
+                provider = ImageProvider(R.drawable.ic_skip_next),
                 contentDescription = "Next",
                 modifier = GlanceModifier
-                    .size(30.dp)
+                    .size(28.dp)
                     .clickable(actionRunCallback<SkipNextAction>())
             )
 
