@@ -92,20 +92,24 @@ class GlanceWidget : GlanceAppWidget() {
                         .cornerRadius(24.dp)
                         .padding(12.dp)
                 ) {
-                    when {
-                        size.width < 120.dp && size.height < 120.dp -> {
-                            Compact1x1Widget(ampState)
-                        }
-                        size.height < 150.dp -> {
-                            Medium4x2Widget(ampState, isLiked)
-                        }
-                        size.width < 200.dp -> {
-                            Square2x2Widget(ampState, isLiked)
-                        }
-                        else -> {
-                            Large4x4DashboardWidget(ampState, isLiked)
-                        }
-                    }
+                   if(ampState.currentSong == null){
+                       EmptyWidget() // New empty widget when there's no music
+                   } else {
+                       when {
+                           size.width < 120.dp && size.height < 120.dp -> {
+                               Compact1x1Widget(ampState)
+                           }
+                           size.height < 150.dp -> {
+                               Medium4x2Widget(ampState, isLiked)
+                           }
+                           size.width < 200.dp -> {
+                               Square2x2Widget(ampState, isLiked)
+                           }
+                           else -> {
+                               Large4x4DashboardWidget(ampState, isLiked)
+                           }
+                       }
+                   }
                 }
             }
         }
@@ -654,5 +658,32 @@ class AlbumDTAction: ActionCallback{
         } else{
             lastClickTime = currentTime // for first tap
         }
+    }
+}
+
+
+@Composable
+private fun EmptyWidget() {
+    Column(
+        modifier = GlanceModifier.fillMaxSize().clickable(actionStartActivity<MainActivity>()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            provider = ImageProvider(android.R.drawable.ic_menu_search),
+            contentDescription = "Choose a Song",
+            modifier = GlanceModifier.size(36.dp)
+        )
+
+        Spacer(modifier = GlanceModifier.height(8.dp))
+
+        Text(
+            text = "Tap to pick a song",
+            style = TextStyle(
+                color = ColorProvider(day = Color.White, night = Color.White), // both white ig
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+        )
     }
 }
