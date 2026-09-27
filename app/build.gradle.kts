@@ -60,6 +60,8 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("dev.chrisbanes.haze:haze:2.0.0")
     implementation("dev.chrisbanes.haze:haze-blur:2.0.0")
+    implementation("androidx.glance:glance-appwidget:1.1.1")
+    implementation("androidx.glance:glance-material3:1.1.1")
     implementation(libs.androidx.compose.animation.core)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

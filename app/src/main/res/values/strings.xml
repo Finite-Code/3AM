@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Music</string>
+    <string name="app_name">3AM</string>
+    <string name="widget_description">The average music player.</string>
 </resources>
