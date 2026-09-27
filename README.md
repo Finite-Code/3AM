@@ -9,7 +9,8 @@
 - **Aesthetics**: While not a technical feature, the app features slick glassmorphism/realtime-blurs and a dark/moody OLED vibe.
 
 ## 📱 Screenshots
-> Coming Soon
+<img width="1728" height="1117" alt="MacBook Pro 16_ - 1(1)" src="https://github.com/user-attachments/assets/fdc9b1b8-7e9c-4474-8c70-5d8c4a32a48b" />
+
 
 ## 🏗️ the Stack
 - **UI**: Jetpack Compose, Material 3 Expressive, Coil, [Haze from chrisbanes](https://chrisbanes.github.io/haze/latest/)
