@@ -48,6 +48,7 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import com.slate.music.AppSettings
+import com.slate.music.R
 import com.slate.music.amp.AmpEngine
 import com.slate.music.amp.AmpState
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -173,7 +174,7 @@ private fun Square2x2Widget(state: AmpState, isLiked: Boolean) {
                     contentAlignment = Alignment.TopEnd
                 ) {
                     Image(
-                        provider = ImageProvider(android.R.drawable.star_on),
+                        provider = ImageProvider(R.drawable.ic_heart_filled),
                         contentDescription = "Liked",
                         modifier = GlanceModifier.size(18.dp)
                     )
@@ -308,7 +309,7 @@ private fun Medium4x2Widget(state: AmpState, isLiked: Boolean) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
                     provider = ImageProvider(
-                        if (isLiked) android.R.drawable.star_on else android.R.drawable.star_off
+                        if (isLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart
                     ),
                     contentDescription = "Favorite",
                     modifier = GlanceModifier
@@ -405,32 +406,40 @@ private fun Large4x4DashboardWidget(state: AmpState, isLiked: Boolean) {
 
         Spacer(modifier = GlanceModifier.height(12.dp))
 
-        Column(modifier = GlanceModifier.fillMaxWidth()) {
-            Text(
-                text = song?.title?.lowercase() ?: "no track playing",
-                style = TextStyle(
-                    color = ColorProvider(day = Color(0xFFFFFFFF), night = Color(0xFFFFFFFF)),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                maxLines = 1
-            )
+        Row(
+            modifier = GlanceModifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = GlanceModifier.defaultWeight()) {
+                Text(
+                    text = song?.title?.lowercase() ?: "no track playing",
+                    style = TextStyle(
+                        color = ColorProvider(day = Color(0xFFFFFFFF), night = Color(0xFFFFFFFF)),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    maxLines = 1
+                )
+                Text(
+                    text = song?.artist ?: "open 3am to play music",
+                    style = TextStyle(
+                        color = ColorProvider(day = Color(0xFF888888), night = Color(0xFF888888)),
+                        fontSize = 13.sp
+                    ),
+                    maxLines = 1
+                )
+            }
+
+            Spacer(modifier = GlanceModifier.width(8.dp))
+
             Image(
                 provider = ImageProvider(
-                    if (isLiked) android.R.drawable.star_on else android.R.drawable.star_off
+                    if (isLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart
                 ),
                 contentDescription = "Favorite",
                 modifier = GlanceModifier
-                    .size(22.dp)
+                    .size(24.dp)
                     .clickable(actionRunCallback<ToggleFavoriteAction>())
-            )
-            Text(
-                text = song?.artist ?: "open 3am to play music",
-                style = TextStyle(
-                    color = ColorProvider(day = Color(0xFF888888), night = Color(0xFF888888)),
-                    fontSize = 13.sp
-                ),
-                maxLines = 1
             )
         }
 
