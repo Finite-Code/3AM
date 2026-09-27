@@ -1,9 +1,13 @@
 package com.slate.music
 
 import android.content.Context
+import com.slate.music.ui.widget.updateGlanceWidgets
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 object AppSettings {
 
@@ -41,12 +45,16 @@ object AppSettings {
             .putBoolean(HAPTICS, enabled).apply()
     }
 
-    fun toggleFavorite(context: Context, trackId: String){
+    fun toggleFavorite(context: Context, trackId: String) {
         val currentSet = _favoriteTrackIds.value
-        val newSet = if(trackId in currentSet) currentSet - trackId else currentSet + trackId
+        val newSet = if (trackId in currentSet) currentSet - trackId else currentSet + trackId
         _favoriteTrackIds.value = newSet
 
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
             .putStringSet(FAVORITES, newSet).apply()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            updateGlanceWidgets(context)
+        }
     }
 }

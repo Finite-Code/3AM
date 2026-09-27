@@ -9,6 +9,7 @@ import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.MoreExecutors
 import com.slate.music.data.HeartSong
 import com.slate.music.data.ListeningStatsManager
+import com.slate.music.ui.widget.updateGlanceWidgets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -42,6 +43,8 @@ object AmpEngine {
     private var playlistSongs: List<HeartSong> = emptyList()
 
     private var appContext: Context? = null
+
+    private var lastWidgetProgressSec = -1L
 
     fun initialize(context: Context) {
         if (controller != null) return
@@ -177,6 +180,8 @@ object AmpEngine {
         val currentMediaId = player.currentMediaItem?.mediaId
         val previousSong = _state.value.currentSong
         val previousProgress = _state.value.progressMs
+        val previousIsPlaying = _state.value.isPlaying
+        val previousMediaId = _state.value.currentSong?.id?.toString()
 
         // fixup!: When active track changes, log the previous track's actual listened duration
         if (previousSong != null && previousSong.id.toString() != currentMediaId && previousProgress > 3000L) {
@@ -199,6 +204,13 @@ object AmpEngine {
             playbackSpeed = player.playbackParameters.speed,
             volume = player.volume
         )
+
+        // For widget updates
+        if(previousMediaId != currentMediaId || previousIsPlaying != player.isPlaying){
+            appContext?.let{ ctx ->
+                scope.launch(Dispatchers.IO) { updateGlanceWidgets(ctx) }
+            }
+        }
     }
 
     private fun startProgressTracker() {
@@ -206,10 +218,22 @@ object AmpEngine {
             while (isActive) {
                 controller?.let { ctrl ->
                     if (ctrl.isPlaying) {
+
+                        val posMs = ctrl.currentPosition.coerceAtLeast(0L)
+                        val durMs = ctrl.duration.coerceAtLeast(0L)
+
                         _state.value = _state.value.copy(
-                            progressMs = ctrl.currentPosition.coerceAtLeast(0L),
-                            durationMs = ctrl.duration.coerceAtLeast(0L)
+                            progressMs = posMs,
+                            durationMs = durMs
                         )
+
+                        val currentProgressTrack = posMs / 5000L
+                        if(currentProgressTrack != lastWidgetProgressSec){
+                            lastWidgetProgressSec = currentProgressTrack
+                            appContext?.let { ctx ->
+                                launch(Dispatchers.IO) { updateGlanceWidgets(ctx) }
+                            }
+                        }
                     }
                 }
                 delay(500)

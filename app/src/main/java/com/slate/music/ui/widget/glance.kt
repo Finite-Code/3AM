@@ -1,5 +1,6 @@
 package com.slate.music.ui.widget
 
+import com.slate.music.ui.widget.GlanceWidget
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -48,6 +49,7 @@ import androidx.glance.text.TextStyle
 import com.slate.music.AppSettings
 import com.slate.music.amp.AmpEngine
 import com.slate.music.amp.AmpState
+import androidx.glance.appwidget.GlanceAppWidgetManager
 
 // Glance Wigdet & Responsive Size - Pass 3
 
@@ -627,5 +629,20 @@ class ToggleRepeatAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         AmpEngine.toggleRepeatMode()
         GlanceWidget().update(context, glanceId)
+    }
+}
+
+suspend fun updateGlanceWidgets(context: Context){
+    try{
+        val manager = GlanceAppWidgetManager(context)
+        val glanceIds = manager.getGlanceIds(GlanceWidget::class.java)
+        if(glanceIds.isNotEmpty()){
+            val widget = GlanceWidget()
+            for(glanceId in glanceIds){
+                widget.update(context, glanceId)
+            }
+        }
+    } catch(e: Exception){
+        // just do it. (checkmark)
     }
 }
