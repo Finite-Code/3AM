@@ -1,0 +1,39 @@
+name: Release Builder
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-n-release:
+    name: Build & Release APK
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Grabs everything lol
+
+      - name: Set-up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Build Production APK
+        run: ./gradlew assembleRelease
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: releasenotes.latest
+          files: app/build/outputs/apk/release/app-release-unsigned.apk
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
