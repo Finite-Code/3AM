@@ -52,6 +52,8 @@ import com.slate.music.R
 import com.slate.music.amp.AmpEngine
 import com.slate.music.amp.AmpState
 import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.glance.action.actionStartActivity
+import com.slate.music.MainActivity
 
 // Glance Wigdet & Responsive Size - Pass 3
 
@@ -86,7 +88,7 @@ class GlanceWidget : GlanceAppWidget() {
                 Box(
                     modifier = GlanceModifier
                         .fillMaxSize()
-                        .background(Color(0xFF121212))
+                        .background(Color(0xFF000000))
                         .cornerRadius(24.dp)
                         .padding(12.dp)
                 ) {
@@ -128,7 +130,7 @@ private fun Compact1x1Widget(state: AmpState) {
         contentAlignment = Alignment.Center,
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(Color(0xFF1E1E1E))
+            .background(Color(0xFF000000))
             .cornerRadius(18.dp)
             .clickable(actionRunCallback<TogglePlayPauseAction>())
     ) {
@@ -260,7 +262,7 @@ private fun Medium4x2Widget(state: AmpState, isLiked: Boolean) {
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(Color(0xFF181818))
+            .background(Color(0xFF000000))
             .cornerRadius(20.dp)
             .padding(10.dp)
     ) {
@@ -375,7 +377,7 @@ private fun Large4x4DashboardWidget(state: AmpState, isLiked: Boolean) {
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(Color(0xFF141414))
+            .background(Color(0xFF000000))
             .cornerRadius(24.dp)
             .padding(16.dp)
     ) {
@@ -412,7 +414,7 @@ private fun Large4x4DashboardWidget(state: AmpState, isLiked: Boolean) {
                     maxLines = 1
                 )
                 Text(
-                    text = song?.artist ?: "open 3am to play music",
+                    text = song?.artist ?: "open 3AM to play music",
                     style = TextStyle(
                         color = ColorProvider(day = Color(0xFF888888), night = Color(0xFF888888)),
                         fontSize = 13.sp
