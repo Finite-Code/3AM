@@ -15,14 +15,16 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0  # Grabs everything lol
 
       - name: Set-up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
+          distribution: 'temurin'
           java-version: '17'
+          cache: 'gradle'
 
       - name: Make gradlew executable
         run: chmod +x gradlew
@@ -31,9 +33,7 @@ jobs:
         run: ./gradlew assembleRelease
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           body_path: releasenotes.latest
           files: app/build/outputs/apk/release/app-release-unsigned.apk
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
