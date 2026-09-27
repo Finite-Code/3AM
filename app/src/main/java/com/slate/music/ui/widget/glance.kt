@@ -23,6 +23,7 @@ import androidx.glance.action.ActionParameters
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
@@ -565,25 +566,12 @@ private fun AlbumArtImage(uriString: String?, modifier: GlanceModifier = GlanceM
 
 @Composable
 private fun WidgetProgressBar(progressFraction: Float, modifier: GlanceModifier = GlanceModifier) {
-    val activeWeight = progressFraction.coerceIn(0.01f, 1f)
-    val inactiveWeight = (1f - activeWeight).coerceAtLeast(0.01f)
-
-    Row(
-        modifier = modifier
-            .background(Color(0xFF333333))
-            .cornerRadius(2.dp)
-    ) {
-        Box(
-            modifier = GlanceModifier
-                .defaultWeight()
-                .fillMaxHeight()
-                .background(Color(0xFFEFB4E0))
-        ) {}
-
-        if (inactiveWeight > 0.01f) {
-            Spacer(modifier = GlanceModifier.defaultWeight())
-        }
-    }
+    LinearProgressIndicator(
+        progress = progressFraction.coerceIn(0f, 1f),
+        modifier = modifier.fillMaxWidth().height(2.dp),
+        color = ColorProvider(day = Color.White, night = Color.White),
+        backgroundColor = ColorProvider(day = Color.White.copy(alpha = 0.2f), night = Color.White.copy(alpha = 0.2f))
+    )
 }
 
 // Action Callbacks
