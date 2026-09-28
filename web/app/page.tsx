@@ -37,7 +37,7 @@ export default function Home() {
       <div className="pointer-events-none fixed inset-0 z-50 h-full w-full opacity-[0.04]">
         <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="h-full w-full">
             <filter id="noiseFilter">
-                <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTitles="stitch" />
+                <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
             </filter>
         </svg>
       </div>
