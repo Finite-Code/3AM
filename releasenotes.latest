@@ -1,11 +1,7 @@
 # 3AM
-v1.0.1
+v1.0.2
 
 ## What's New?
 
-### Visual Changes
-- Brand New App Icon: I've completed the app icon design! It now features a sleek, metallic gradient that matches the app's home screen, set against a pitch-black background for the "3AM" feel.
-> Also Added: Adaptive Icon Support
-
-### Under-the-Hood Improvements
-- Lighter & Faster: I've enabled build optimizations (R8 shrinking) which significantly reduced the app's download (60MB -> ~6MB) size and overall performance.
+## Hotfix
+> Just realized unsigned APKs can't be installed easily. Updated Downloads are now signed with a debug key!
