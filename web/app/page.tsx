@@ -3,7 +3,7 @@
 import { TextMorph } from "@/components/shadcn-space/animated-text/animated-text-07";
 import { Six_Caps, Geist } from 'next/font/google';
 import {motion} from "motion/react";
-import {Download, WifiOff, AudioLines, Cpu} from "lucide-react";
+import {WifiOff, AudioLines, Cpu} from "lucide-react";
 
 const sixCaps = Six_Caps({
   weight: '400', // Six Caps ONLY supports weight 400
@@ -66,8 +66,8 @@ export default function Home() {
           className="mt-12 group relative inline-flex h-14 items-center justify-center gap-3 overflow-hidden rounded-full bg-white px-8 font-medium text-black transition-all hover:scale-105 active:scale-95">
 
           <div className="relative flex items-center justify-center w-5 h-5 overflow-hidden">
-            <Download className="w-5 h-5 absolute transition-transform duration-300 group-hover:-translate-y-6" />
-            <Download className="w-5 h-5 absolute transition-transform duration-300 translate-y-6 group-hover:translate-y-0" />
+            <AndroidIcon className="w-5 h-5 absolute transition-transform duration-300 group-hover:-translate-y-6" />
+            <AndroidIcon className="w-5 h-5 absolute transition-transform duration-300 translate-y-6 group-hover:translate-y-0" />
           </div>
           <span>Download for Android</span>
         </motion.button>
@@ -109,5 +109,18 @@ function FeatureCard({ icon, title, description }: {icon: React.ReactNode, title
                 {description}
             </p>
         </div>
+    );
+}
+
+function AndroidIcon({ className }: { className?: string }) {
+    return(
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className={className}
+        >
+          <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4483-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0004.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592c.1687-.2894.0682-.661-.2195-.8287-.2876-.169-.661-.0678-.8283.2206L16.8042 8.76c-1.4283-.652-3.051-.1022-4.8042-1.022-1.7535 0-3.376.37-4.8046 1.022L5.1687 5.2544c-.1673-.2884-.5407-.3896-.8283-.2206-.2876.1676-.3882.5393-.2195.8287l1.9973 3.4592C2.6322 11.2335.2504 14.659.043 18.665h23.914c-.2074-4.006-2.5892-7.4315-6.0755-9.3436" />
+        </svg>
     );
 }
