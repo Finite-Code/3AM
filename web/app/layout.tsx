@@ -34,6 +34,10 @@ export const metadata: Metadata = {
       type: "website",
   },
   themeColor: "#000000", // prefer dark theme xD
+  icons: {
+    icon: '/icon.png',
+    apple: '/icon.png',
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
