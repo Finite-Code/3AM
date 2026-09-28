@@ -59,7 +59,10 @@ export default function Home() {
                 Listen to better, richer music. <br/> All offline and on-device.
         </motion.p>
 
-        <motion.button
+        <motion.a
+          href="https://github.com/Finite-Code/3AM/releases/latest"
+          target="_blank"
+          rel="noopener noreferrer"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.8 }}
@@ -70,7 +73,7 @@ export default function Home() {
             <AndroidIcon className="w-5 h-5 absolute transition-transform duration-300 translate-y-6 group-hover:translate-y-0" />
           </div>
           <span>Download for Android</span>
-        </motion.button>
+        </motion.a>
 
       </section>
 
