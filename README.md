@@ -9,7 +9,7 @@
 - **Aesthetics**: While not a technical feature, the app features slick glassmorphism/realtime-blurs and a dark/moody OLED vibe.
 
 ## 📱 Screenshots
-<img width="1728" height="1117" alt="MacBook Pro 16_ - 1(1)" src="https://github.com/user-attachments/assets/fdc9b1b8-7e9c-4474-8c70-5d8c4a32a48b" />
+<img width="1728" height="1117" alt="MacBook Pro 16_ - 1(1)" src="https://github.com/user-attachments/assets/fba780c7-d035-457c-8660-47b4e774a23b" />
 
 
 ## 🏗️ the Stack
@@ -34,6 +34,7 @@ cd 3AM
 AI/LLMs were used for the following things:
 - Antigravity: to generate a color scheme for the app logo. 
 - Android Studio's native tab to autocomplete (idk if it uses AI)
+- To setup regex matching [`3ae56a`](https://github.com/Finite-Code/3AM/commit/3ae56adf39d562150be1c68298d3a0579f4cecf8)
 
 > Not AI but: used online components to generate a boilerplate-UI for the web
 
