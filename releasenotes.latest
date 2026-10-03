@@ -5,9 +5,11 @@ v1.1.0-stable
 ### Tap and Hold
 Now you can tap and hold any music card to see and perform quick actions including Adding to favorites, Playlists or Playing a song next!
 
+### Sleep Timer
+A Bedtime icon right in the player action bar! Set a countdown (15m, 30m, 60m) or stop music automatically right when the current track finishes. Includes a smooth 10-second volume fade out so music doesn't abruptly stop.
+
 ### Auto Versioning
 Made a Gradle build action. App diagnostics, build counters, and release notes now sync automatically on compile.
 
 ## Bug fixes
 - Fixed a bug where contents from the previous screen would peak through the Insights header on the Insights Screen.
-- Fixed a bug where contents from the previous screen would bleed through the Insights header on the Listening Stats screen.
