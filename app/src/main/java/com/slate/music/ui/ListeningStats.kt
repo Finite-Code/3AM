@@ -78,6 +78,7 @@ fun ListeningStatsScreen(
         ) + fadeOut(tween(300)),
         modifier = modifier
     ) {
+        val localHazeState = remember { HazeState() }
         val statsState by ListeningStatsManager.state.collectAsState()
         val isBlurEnabled by AppSettings.isBlurEnabled.collectAsState()
         val scrollState = rememberLazyListState()
@@ -102,7 +103,7 @@ fun ListeningStatsScreen(
                 state = scrollState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .hazeSource(state = hazeState),
+                    .hazeSource(state = localHazeState),
                 contentPadding = PaddingValues(
                     top = 180.dp,
                     bottom = 120.dp,
@@ -374,7 +375,7 @@ fun ListeningStatsScreen(
                     .then(
                         if (isBlurEnabled) {
                             Modifier.hazeBlur(
-                                input = HazeInput.Sources(state = hazeState),
+                                input = HazeInput.Sources(state = localHazeState),
                                 style = HazeBlurStyle {
                                     blurRadius(24.dp)
                                     noiseFactor(0f)
@@ -388,7 +389,7 @@ fun ListeningStatsScreen(
                             )
                         } else Modifier
                     )
-                    .background(if (isBlurEnabled) Color.Black.copy(alpha = 0.75f) else Color.Black)
+                    .background(if (isBlurEnabled) Color.Black.copy(alpha = 0.01f) else Color.Black)
                     .align(Alignment.TopCenter)
             ) {
                 Row(
