@@ -57,6 +57,7 @@ android {
 tasks.register("incrementBuildCounter"){
     description = "Updates release notes and increments build count on every succesful build."
     doLast {
+        // REGEX MATCHING WAS GENERATED USING LLMs
         val relNotesFile = rootProject.file("releasenotes.latest")
         if (relNotesFile.exists()) {
             val notesText = relNotesFile.readText()
