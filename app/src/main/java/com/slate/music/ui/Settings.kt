@@ -49,14 +49,10 @@ fun SettingsScreen(
     var backProgress by remember { mutableFloatStateOf(0f) }
 
     PredictiveBackHandler(enabled = isVisible) { progressFlow ->
-        try {
-            progressFlow.collect { backEvent ->
-                backProgress = backEvent.progress
-            }
-            onClose()
-        } catch (_: CancellationException) {
-            backProgress = 0f
+        progressFlow.collect { backEvent ->
+            backProgress = backEvent.progress
         }
+        onClose()
     }
 
     LaunchedEffect(isVisible) {
@@ -89,11 +85,6 @@ fun SettingsScreen(
         ) + fadeOut(tween(300)),
         modifier = modifier
     ) {
-        var hapticFeedback by remember { mutableStateOf(true) }
-        var highRes by remember { mutableStateOf(true) }
-        var x_fadeDur by remember { mutableFloatStateOf(3f) }
-        var gaplessPlay by remember { mutableStateOf(true) }
-        var darkGlass by remember { mutableStateOf(true) }
 
         val scale = 1f - (backProgress * 0.16f)
         val cornerRadius = (backProgress * 32).dp
@@ -170,36 +161,40 @@ fun SettingsScreen(
                     SettingsSectionHeader(title = "Audio & Playback")
                 }
 
-                item {
-                    SettingsItemSwitch(
-                        icon = Icons.Rounded.GraphicEq,
-                        title = "High-Res Audio",
-                        subtitle = "Stream in high-res audio",
-                        checked = highRes,
-                        onCheckedChange = { highRes = it }
-                    )
-                }
-
-                item {
-                    SettingsItemSwitch(
-                        icon = Icons.AutoMirrored.Rounded.QueueMusic,
-                        title = "Gapless Playback",
-                        subtitle = "Skip songs when finished",
-                        checked = gaplessPlay,
-                        onCheckedChange = { gaplessPlay = it }
-                    )
-                }
-
-                item {
-                    SettingsItemSlider(
-                        icon = Icons.Rounded.Timelapse,
-                        title = "Crossfade",
-                        value = x_fadeDur,
-                        valueRange = 0f..10f,
-                        valueLabel = "${x_fadeDur.toInt()}s",
-                        onValueChange = { x_fadeDur = it }
-                    )
-                }
+                /*
+                 * TODO: High-Res Audio, Gapless Playback, and Crossfade.
+                 * Couldn't ship these planned features in time for the hackathon submission!
+                 * They are just dummy sliders rn that reset on close.
+                 * Media3 has gapless on by default anyway so no point in a switch.
+                 */
+                // item {
+                //     SettingsItemSwitch(
+                //         icon = Icons.Rounded.GraphicEq,
+                //         title = "High-Res Audio",
+                //         subtitle = "Stream in high-res audio",
+                //         checked = true,
+                //         onCheckedChange = { }
+                //     )
+                // }
+                // item {
+                //     SettingsItemSwitch(
+                //         icon = Icons.AutoMirrored.Rounded.QueueMusic,
+                //         title = "Gapless Playback",
+                //         subtitle = "Skip songs when finished",
+                //         checked = true,
+                //         onCheckedChange = {  }
+                //     )
+                // }
+                // item {
+                //     SettingsItemSlider(
+                //         icon = Icons.Rounded.Timelapse,
+                //         title = "Crossfade",
+                //         value = 3f,
+                //         valueRange = 0f..10f,
+                //         valueLabel = "3s",
+                //         onValueChange = { }
+                //     )
+                // }
 
                 item {
                     com.slate.music.amp.EqualizerControlCard(hazeState = hazeState)
