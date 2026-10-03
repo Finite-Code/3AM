@@ -23,7 +23,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -42,7 +42,14 @@ fun SquareMusicCard(
             .fillMaxWidth()
             .aspectRatio(1f)
             .onGloballyPositioned { coordinates ->
-                cardBounds = coordinates.boundsInWindow()
+                val pos = coordinates.positionInWindow()
+                val size = coordinates.size
+                cardBounds = Rect(
+                    left = pos.x,
+                    top = pos.y,
+                    right = pos.x + size.width,
+                    bottom = pos.y + size.height
+                )
             }
             .pointerInput(Unit) {
                 detectTapGestures(
