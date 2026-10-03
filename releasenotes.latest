@@ -1,10 +1,13 @@
 # 3AM
 v1.1.0-stable
 
-## What's Up?
-
+## New Features:
 ### Tap and Hold
 Now you can tap and hold any music card to see and perform quick actions including Adding to favorites, Playlists or Playing a song next!
 
-### Bug fixes
+### Auto Versioning
+Made a Gradle build action. App diagnostics, build counters, and release notes now sync automatically on compile.
+
+## Bug fixes
 - Fixed a bug where contents from the previous screen would peak through the Insights header on the Insights Screen.
+- Fixed a bug where contents from the previous screen would bleed through the Insights header on the Listening Stats screen.
