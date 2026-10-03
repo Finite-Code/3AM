@@ -187,8 +187,11 @@ fun HomeScreen() {
     var contextMenuTrack by remember { mutableStateOf<Track?>(null) }
     var contextMenuBounds by remember { mutableStateOf<Rect?>(null) }
 
+    var isSleepTimerOpen by remember { mutableStateOf(false) }
+    val isSleepTimerActive by SleepTimerEngine.isTimerActive.collectAsState()
+
     val dragAnim = remember { Animatable(0f) }
-    val coroutineScope = rememberCoroutineScope()
+    val  coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(isStatsOpen) {
         val target = if (isStatsOpen) screenWidthPx else 0f
@@ -384,6 +387,12 @@ fun HomeScreen() {
                 hazeState = hazeState
             )
 
+            SleepTimerSheet(
+                isVisible = isSleepTimerOpen,
+                onClose = {isSleepTimerOpen = false},
+                hazeState = hazeState
+            )
+
             TrackContextMenu(
                 track = contextMenuTrack,
                 bounds = contextMenuBounds,
@@ -449,6 +458,7 @@ fun HomeScreen() {
                         liked = isTrackLiked,
                         repeatMode = ampState.repeatMode,
                         isShuffleEnabled = ampState.shuffleModeEnabled,
+                        isSleepTimerActive = isSleepTimerActive,
                         onPlayPauseToggle = {
                             context.performHapticClick()
                             AmpEngine.togglePlayPause()
@@ -480,6 +490,10 @@ fun HomeScreen() {
                         onQueueToggle = {
                             context.performHapticClick()
                             isQueueOpen = true
+                        },
+                        onSleepTimerToggle = {
+                            context.performHapticClick()
+                            isSleepTimerOpen = true
                         },
                         onLikeToggle = {
                             context.performHapticClick()

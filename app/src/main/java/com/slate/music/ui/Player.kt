@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.toLowerCase
 import coil.compose.AsyncImage
 import androidx.media3.common.Player
+import androidx.compose.material.icons.rounded.Bedtime
 
 @Composable
 fun MusicPlayer(
@@ -45,6 +46,8 @@ fun MusicPlayer(
     onPlaylistAddToggle: () -> Unit,
     onQueueToggle: () -> Unit,
     onLikeToggle: () -> Unit,
+    isSleepTimerActive: Boolean = false,
+    onSleepTimerToggle: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -237,6 +240,14 @@ fun MusicPlayer(
                     imageVector = Icons.Rounded.QueueMusic,
                     contentDescription = null,
                     tint = Color.LightGray,
+                )
+            }
+
+            IconButton(onClick = { onSleepTimerToggle?.invoke()}){
+                Icon(
+                    imageVector = Icons.Rounded.Bedtime,
+                    contentDescription = null,
+                    tint = if(isSleepTimerActive) Color.White else Color.LightGray,
                 )
             }
         }
