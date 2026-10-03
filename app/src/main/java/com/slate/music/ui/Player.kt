@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.toLowerCase
 import coil.compose.AsyncImage
-
+import androidx.media3.common.Player
 
 @Composable
 fun MusicPlayer(
@@ -34,10 +34,16 @@ fun MusicPlayer(
     currentPosText: String,
     durtnText: String,
     liked: Boolean,
+    repeatMode: Int,
+    isShuffleEnabled: Boolean,
     onPlayPauseToggle: ()  -> Unit,
     onSkipPrevious: () -> Unit,
     onSkipNext: () -> Unit,
     onSeek: (Float) -> Unit,
+    onShuffleToggle: () -> Unit,
+    onRepeatToggle: () -> Unit,
+    onPlaylistAddToggle: () -> Unit,
+    onQueueToggle: () -> Unit,
     onLikeToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -153,11 +159,11 @@ fun MusicPlayer(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly
         ){
-            IconButton(onClick = {/* TODO: Shuffle */ }){
+            IconButton(onClick = onShuffleToggle){
                 Icon(
                     imageVector = Icons.Rounded.Shuffle,
                     contentDescription = null,
-                    tint = Color.LightGray,
+                    tint = if(isShuffleEnabled) Color.White else Color.LightGray,
                 )
             }
 
@@ -197,9 +203,38 @@ fun MusicPlayer(
                 )
             }
 
-            IconButton(onClick = {/* TODO: Repeat */ }){
+            IconButton(onClick = onRepeatToggle){
+                val repeatIcon = when(repeatMode) {
+                    Player.REPEAT_MODE_ONE -> Icons.Rounded.RepeatOne
+                    else -> Icons.Rounded.Repeat
+                }
                 Icon(
-                    imageVector = Icons.Rounded.Repeat,
+                    imageVector = repeatIcon,
+                    contentDescription = null,
+                    tint = if(repeatMode == Player.REPEAT_MODE_OFF) Color.LightGray else Color.White,
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(20.dp))
+        
+        // extra controls
+        Row(
+           modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ){
+             IconButton(onClick = onPlaylistAddToggle){
+                Icon(
+                    imageVector = Icons.Rounded.PlaylistAdd,
+                    contentDescription = null,
+                    tint = Color.LightGray,
+                )
+            }
+            
+            IconButton(onClick = onQueueToggle){
+                Icon(
+                    imageVector = Icons.Rounded.QueueMusic,
                     contentDescription = null,
                     tint = Color.LightGray,
                 )

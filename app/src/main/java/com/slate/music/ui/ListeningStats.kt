@@ -9,6 +9,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -83,7 +84,7 @@ fun ListeningStatsScreen(
 
         DeadEndHapticHandler(scrollState)
 
-        \n        \n        \n        \n        val todayHours = statsState.todayListeningTimeMs / 1000 / 3600
+        val todayHours = statsState.todayListeningTimeMs / 1000 / 3600
         val todayMins = (statsState.todayListeningTimeMs / 1000 % 3600) / 60
 
         val weeklyHours = statsState.weeklyListeningTimeMs / 1000 / 3600

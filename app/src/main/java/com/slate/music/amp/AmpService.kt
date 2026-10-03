@@ -8,6 +8,9 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import android.content.Intent
+import android.app.PendingIntent
+import com.slate.music.MainActivity
 
 class AmpService : MediaSessionService() {
 
@@ -38,7 +41,25 @@ class AmpService : MediaSessionService() {
 
         player = exoPlayer
 
-        mediaSession = MediaSession.Builder(this, exoPlayer).build()
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        mediaSession = MediaSession.Builder(this, exoPlayer)
+            .setSessionActivity(pendingIntent)
+            .build()
+
+        // Initial EQ setup
+        if (exoPlayer.audioSessionId != 0) {
+            AmpEqualizer.initialize(this, exoPlayer.audioSessionId)
+        }
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        val player = mediaSession?.player
+        if (player != null && !player.playWhenReady) {
+            stopSelf()
+        }
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
@@ -51,6 +72,7 @@ class AmpService : MediaSessionService() {
             release()
             mediaSession = null
         }
+        AmpEqualizer.release()
         player = null
         super.onDestroy()
     }

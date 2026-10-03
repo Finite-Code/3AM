@@ -3,11 +3,13 @@ package com.slate.music.amp
 import android.content.ComponentName
 import android.content.Context
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.MoreExecutors
 import com.slate.music.data.HeartSong
+import com.slate.music.data.HeartEngine
 import com.slate.music.data.ListeningStatsManager
 import com.slate.music.ui.widget.updateGlanceWidgets
 import kotlinx.coroutines.CoroutineScope
@@ -23,7 +25,6 @@ data class AmpState(
     val currentSong: HeartSong? = null,
     val currentIndex: Int = -1,
     val isPlaying: Boolean = false,
-    val isBuffering: Boolean = false,
     val progressMs: Long = 0L,
     val durationMs: Long = 0L,
     val repeatMode: Int = Player.REPEAT_MODE_OFF,
@@ -35,19 +36,22 @@ data class AmpState(
 object AmpEngine {
 
     private var controller: MediaController? = null
+    private var isInitializing = false
     private val scope = CoroutineScope(Dispatchers.Main)
 
     private val _state = MutableStateFlow(AmpState())
     val state: StateFlow<AmpState> = _state.asStateFlow()
 
-    private var playlistSongs: List<HeartSong> = emptyList()
+    private val _queue = MutableStateFlow<List<HeartSong>>(emptyList())
+    val queue = _queue.asStateFlow()
 
     private var appContext: Context? = null
 
     private var lastWidgetProgressSec = -1L
 
     fun initialize(context: Context) {
-        if (controller != null) return
+        if (controller != null || isInitializing) return
+        isInitializing = true
         appContext = context.applicationContext
 
         val sessionToken = SessionToken(
@@ -59,6 +63,7 @@ object AmpEngine {
         controllerFuture.addListener(
             {
                 controller = controllerFuture.get()
+                isInitializing = false
                 setupPlayerListener()
                 startProgressTracker()
             },
@@ -67,13 +72,20 @@ object AmpEngine {
     }
 
     fun playPlaylist(songs: List<HeartSong>, startPosition: Int = 0) {
-        val ctrl = controller ?: return
-        playlistSongs = songs
+        val ctrl = controller
+        if(ctrl == null) return
+        _queue.value = songs
 
         val mediaItems = songs.map { song ->
             MediaItem.Builder()
                 .setMediaId(song.id.toString())
                 .setUri(song.contentUri)
+                .setMediaMetadata(
+                    MediaMetadata.Builder()
+                        .setTitle(song.title)
+                        .setArtist(song.artist)
+                        .build()
+                )
                 .build()
         }
 
@@ -83,7 +95,8 @@ object AmpEngine {
     }
 
     fun togglePlayPause() {
-        val ctrl = controller ?: return
+        val ctrl = controller
+        if(ctrl == null) return
         if (ctrl.isPlaying) ctrl.pause() else ctrl.play()
     }
 
@@ -100,7 +113,8 @@ object AmpEngine {
     }
 
     fun toggleRepeatMode() {
-        val ctrl = controller ?: return
+        val ctrl = controller
+        if(ctrl == null) return
         val nextMode = when (ctrl.repeatMode) {
             Player.REPEAT_MODE_OFF -> Player.REPEAT_MODE_ALL
             Player.REPEAT_MODE_ALL -> Player.REPEAT_MODE_ONE
@@ -111,59 +125,68 @@ object AmpEngine {
     }
 
     fun toggleShuffleMode() {
-        val ctrl = controller ?: return
+        val ctrl = controller
+        if(ctrl == null) return
         val nextShuffle = !ctrl.shuffleModeEnabled
         ctrl.shuffleModeEnabled = nextShuffle
         _state.value = _state.value.copy(shuffleModeEnabled = nextShuffle)
     }
 
     fun setPlaybackSpeed(speed: Float) {
-        val ctrl = controller ?: return
+        val ctrl = controller
+        if(ctrl == null) return
         val validSpeed = speed.coerceIn(0.25f, 2.0f)
         ctrl.setPlaybackSpeed(validSpeed)
         _state.value = _state.value.copy(playbackSpeed = validSpeed)
     }
 
     fun setVolume(volume: Float) {
-        val ctrl = controller ?: return
+        val ctrl = controller
+        if(ctrl == null) return
         val validVolume = volume.coerceIn(0.0f, 1.0f)
         ctrl.volume = validVolume
         _state.value = _state.value.copy(volume = validVolume)
     }
 
-    fun addToQueue(song: HeartSong) {
-        val ctrl = controller ?: return
-        playlistSongs = playlistSongs + song
+    fun enqueue(song: HeartSong) {
+        val ctrl = controller
+        if(ctrl == null) return
+        _queue.value = _queue.value + song
         val mediaItem = MediaItem.Builder()
             .setMediaId(song.id.toString())
             .setUri(song.contentUri)
+            .setMediaMetadata(MediaMetadata.Builder().setTitle(song.title).setArtist(song.artist).build())
             .build()
         ctrl.addMediaItem(mediaItem)
     }
 
     fun playNext(song: HeartSong) {
-        val ctrl = controller ?: return
-        val nextIndex = (ctrl.currentMediaItemIndex + 1).coerceAtMost(playlistSongs.size)
-        playlistSongs = playlistSongs.toMutableList().apply { add(nextIndex, song) }
+        val ctrl = controller
+        if(ctrl == null) return
+        val nextIndex = (ctrl.currentMediaItemIndex + 1).coerceAtMost(_queue.value.size)
+        _queue.value = _queue.value.toMutableList().apply { add(nextIndex, song) }
         val mediaItem = MediaItem.Builder()
             .setMediaId(song.id.toString())
             .setUri(song.contentUri)
+            .setMediaMetadata(MediaMetadata.Builder().setTitle(song.title).setArtist(song.artist).build())
             .build()
         ctrl.addMediaItem(nextIndex, mediaItem)
     }
 
     fun removeQueueItem(index: Int) {
-        val ctrl = controller ?: return
-        if (index in playlistSongs.indices) {
-            playlistSongs = playlistSongs.toMutableList().apply { removeAt(index) }
+        val ctrl = controller
+        if(ctrl == null) return
+        if (index in _queue.value.indices) {
+            _queue.value = _queue.value.toMutableList().apply { removeAt(index) }
             ctrl.removeMediaItem(index)
         }
     }
 
     fun clearQueue() {
-        val ctrl = controller ?: return
+        val ctrl = controller
+        if(ctrl == null) return
         ctrl.clearMediaItems()
-        playlistSongs = emptyList()
+        _queue.value = emptyList()
         _state.value = AmpState()
     }
 
@@ -178,6 +201,13 @@ object AmpEngine {
 
     private fun updateState(player: Player) {
         val currentMediaId = player.currentMediaItem?.mediaId
+
+        // Reconnect session recovery
+        if (_queue.value.isEmpty() && currentMediaId != null) {
+            HeartEngine.songs.value.find { it.id.toString() == currentMediaId }?.let {
+                _queue.value = listOf(it)
+            }
+        }
         val previousSong = _state.value.currentSong
         val previousProgress = _state.value.progressMs
         val previousIsPlaying = _state.value.isPlaying
@@ -190,19 +220,16 @@ object AmpEngine {
             }
         }
 
-        val currentSong = playlistSongs.find { it.id.toString() == currentMediaId }
+        val currentSong = _queue.value.getOrNull(player.currentMediaItemIndex)
 
         _state.value = AmpState(
             currentSong = currentSong,
             currentIndex = player.currentMediaItemIndex,
             isPlaying = player.isPlaying,
-            isBuffering = player.playbackState == Player.STATE_BUFFERING,
             progressMs = player.currentPosition.coerceAtLeast(0L),
             durationMs = player.duration.coerceAtLeast(0L),
             repeatMode = player.repeatMode,
-            shuffleModeEnabled = player.shuffleModeEnabled,
-            playbackSpeed = player.playbackParameters.speed,
-            volume = player.volume
+            shuffleModeEnabled = player.shuffleModeEnabled
         )
 
         // For widget updates
@@ -236,7 +263,7 @@ object AmpEngine {
                         }
                     }
                 }
-                delay(500)
+                delay(1000)
             }
         }
     }

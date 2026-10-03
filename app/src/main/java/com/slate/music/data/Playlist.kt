@@ -9,6 +9,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.UUID
+import java.io.File
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.flow.update
 
 data class Playlist(
     val id: Long,
@@ -18,12 +23,13 @@ data class Playlist(
     val songIds: List<Long> = emptyList()
 )
 
-// TODO: Migrate to Room DB once we add multi-artist support, custom playlist covers & reordering!
+// TODO: Migrate to Room DB eventually. json file is getting slow
 object PlaylistManager {
 
     private const val FILE_NAME = "user_playlists_store.json"
     private val scope = CoroutineScope(Dispatchers.IO)
 
+    private val mutex = Mutex()
     private val _playlists = MutableStateFlow<List<Playlist>>(emptyList())
     val playlists: StateFlow<List<Playlist>> = _playlists.asStateFlow()
 
@@ -35,28 +41,27 @@ object PlaylistManager {
 
         scope.launch {
             val loaded = loadFromStorage(context)
-            _playlists.value = loaded
+            _playlists.update { loaded }
         }
     }
 
     fun createPlaylist(context: Context, name: String, description: String = ""): Playlist {
         val newPlaylist = Playlist(
-            id = System.currentTimeMillis(),
+            id = UUID.randomUUID().mostSignificantBits and Long.MAX_VALUE,
             name = name,
             description = description,
-            createdAtTimestamp = System.currentTimeMillis(),
             songIds = emptyList()
         )
 
         val updatedList = _playlists.value + newPlaylist
-        _playlists.value = updatedList
+        _playlists.update { updatedList }
         persistToStorage(context, updatedList)
         return newPlaylist
     }
 
     fun deletePlaylist(context: Context, playlistId: Long) {
         val updatedList = _playlists.value.filterNot { it.id == playlistId }
-        _playlists.value = updatedList
+        _playlists.update { updatedList }
         persistToStorage(context, updatedList)
     }
 
@@ -72,7 +77,7 @@ object PlaylistManager {
                 playlist
             }
         }
-        _playlists.value = updatedList
+        _playlists.update { updatedList }
         persistToStorage(context, updatedList)
     }
 
@@ -84,7 +89,7 @@ object PlaylistManager {
                 playlist
             }
         }
-        _playlists.value = updatedList
+        _playlists.update { updatedList }
         persistToStorage(context, updatedList)
     }
 
@@ -121,34 +126,37 @@ object PlaylistManager {
                 )
             }
         } catch (_: Exception) {
-            // Json parse error / corrupt file, just return whatever loaded
+            // corrupt file or smth
         }
         return loadedPlaylists
     }
 
     private fun persistToStorage(context: Context, playlistsList: List<Playlist>) {
         scope.launch {
-            try {
-                val jsonArray = JSONArray()
-                playlistsList.forEach { playlist ->
-                    val obj = JSONObject().apply {
-                        put("id", playlist.id)
-                        put("name", playlist.name)
-                        put("description", playlist.description)
-                        put("createdAtTimestamp", playlist.createdAtTimestamp)
+            mutex.withLock {
+                try {
+                    val jsonArray = JSONArray()
+                    playlistsList.forEach { playlist ->
+                        val obj = JSONObject().apply {
+                            put("id", playlist.id)
+                            put("name", playlist.name)
+                            put("description", playlist.description)
+                            put("createdAtTimestamp", playlist.createdAtTimestamp)
 
-                        val idsArray = JSONArray()
-                        playlist.songIds.forEach { idsArray.put(it) }
-                        put("songIds", idsArray)
+                            val idsArray = JSONArray()
+                            playlist.songIds.forEach { idsArray.put(it) }
+                            put("songIds", idsArray)
+                        }
+                        jsonArray.put(obj)
                     }
-                    jsonArray.put(obj)
-                }
 
-                context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE).use { output ->
-                    output.write(jsonArray.toString(2).toByteArray())
+                    val file = File(context.filesDir, FILE_NAME)
+                    val tmpFile = File(context.filesDir, "$FILE_NAME.tmp")
+                    tmpFile.writeText(jsonArray.toString())
+                    tmpFile.renameTo(file)
+                } catch (_: Exception) {
+                    // ignore write fails
                 }
-            } catch (_: Exception) {
-                // Ignore storage write failures
             }
         }
     }

@@ -247,8 +247,7 @@ fun SettingsScreen(
 
             AboutScreen(
                 isVisible = isAboutOpen,
-                onClose = { isAboutOpen = false },
-                hazeState = hazeState
+                onClose = { isAboutOpen = false }
             )
         }
     }
