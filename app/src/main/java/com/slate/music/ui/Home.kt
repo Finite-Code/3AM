@@ -183,6 +183,8 @@ fun HomeScreen() {
     val config = LocalConfiguration.current
     val screenWidthPx = with(density) { config.screenWidthDp.dp.toPx() }
 
+    var contextMenuTrack by remember {mutableStateOf<Track?>(null)}
+
     val dragAnim = remember { Animatable(0f) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -264,7 +266,11 @@ fun HomeScreen() {
                         MusicSectionRow(
                             title = "Top Played",
                             tracks = displayTracks,
-                            onTrackSelected = handleTrackSelected
+                            onTrackSelected = handleTrackSelected,
+                            onTrackLongClicked = { track ->
+                                contextMenuTrack = track
+                                context.performHapticClick()
+                            }
                         )
                     }
 
@@ -272,7 +278,11 @@ fun HomeScreen() {
                         MusicSectionRow(
                             title = "Your Top Artists",
                             tracks = displayTracks,
-                            onTrackSelected = handleTrackSelected
+                            onTrackSelected = handleTrackSelected,
+                            onTrackLongClicked = { track ->
+                                contextMenuTrack = track
+                                context.performHapticClick()
+                            }
                         )
                     }
 
@@ -280,7 +290,11 @@ fun HomeScreen() {
                         MusicSectionRow(
                             title = "Favourites <3",
                             tracks = favTracks,
-                            onTrackSelected = handleTrackSelected
+                            onTrackSelected = handleTrackSelected,
+                            onTrackLongClicked = { track ->
+                                contextMenuTrack = track
+                                context.performHapticClick()
+                            }
                         )
                     }
 
@@ -363,6 +377,12 @@ fun HomeScreen() {
                 isVisible = isQueueOpen,
                 onClose = { isQueueOpen = false },
                 hazeState = hazeState
+            )
+
+            TrackContextMenu(
+                track = contextMenuTrack,
+                isVisible = contextMenuTrack != null,
+                onDismiss = { contextMenuTrack = null }
             )
 
             if (showAddToPlaylistDialog && ampState.currentSong != null){
@@ -587,7 +607,8 @@ fun MiniPlayer(
 fun MusicSectionRow(
     title: String,
     tracks: List<Track>,
-    onTrackSelected: (Track) -> Unit
+    onTrackSelected: (Track) -> Unit,
+    onTrackLongClicked: ((Track) -> Unit)? = null
 ) {
     Column(
         modifier = Modifier
@@ -620,6 +641,7 @@ fun MusicSectionRow(
                     SquareMusicCard(
                         track = track,
                         onClick = { onTrackSelected(track) },
+                        onLongClick = {onTrackLongClicked?.invoke(track)},
                         modifier = Modifier.width(176.dp)
                     )
                 }

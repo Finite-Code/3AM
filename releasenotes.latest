@@ -1,23 +1,7 @@
 # 3AM
-v1.0.0-stable
-
-# First Stable Release
-This marks the first stable release of 3AM after a little over 62 hours of work in!
+v1.1.0-stable
 
 ## What's Up?
 
-### 🚀 Optimizations & Performance
-- Slashed app opening times by over 50% by optimizing animations and reducing HeartEngine's scan time.
-- Heavy UI Refactoring: Conducted a massive structural cleanup app-wide, resulting in a leaner yet fulfilling experience.
-- APK Shrinking: Enabled full R8 code shrinking and obfuscation.
-- Smart Polling: Dialed back the widget and notification polling rate from 500ms to a more friendly 1000ms.
-
-### 🤝 Data & Privacy
-- Local Only: The app relies on local files, and no data is sent or received to the cloud.
-- Statistics: The app collects listening times and other playback data to display statistics, all stored and processed locally.
-
-
-### 🌐Web
-- Initial minimal Next.js based website.
-- Github Pages Integration: For hosting deployments.
-- Downloads: Handling all downloads and redirecting to releases from the website
+### Tap and Hold
+Now you can tap and hold any music card to see and perform quick actions including Adding to favorites, Playlists or Playing a song next!
