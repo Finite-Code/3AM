@@ -1,5 +1,5 @@
 version.major=1
-version.minor=1
-version.patch=0
+version.minor=2
+version.patch=1
 version.status=stable
-build.counter=517
+build.counter=519
