@@ -391,7 +391,8 @@ fun HomeScreen() {
                 onDismiss = {
                     contextMenuTrack = null
                     contextMenuBounds = null
-                }
+                },
+                hazeState = hazeState
             )
 
             if (showAddToPlaylistDialog && ampState.currentSong != null){

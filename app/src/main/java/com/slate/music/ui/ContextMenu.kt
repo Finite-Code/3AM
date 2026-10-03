@@ -2,56 +2,56 @@
 
 package com.slate.music.ui
 
-import android.view.RoundedCorner
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.*
-import com.slate.music.data.HeartEngine
-import com.slate.music.util.performHapticClick
-import kotlinx.coroutines.launch
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.FavoriteBorder
-import androidx.compose.material.icons.rounded.PlaylistAdd
-import androidx.compose.material.icons.rounded.QueuePlayNext
-import androidx.compose.material3.*
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.QueuePlayNext
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.slate.music.AppSettings
 import com.slate.music.amp.AmpEngine
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
+import com.slate.music.data.HeartEngine
+import com.slate.music.util.performHapticClick
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.blur.HazeBlurStyle
+import dev.chrisbanes.haze.blur.hazeBlur
+import kotlinx.coroutines.launch
 
 @Composable
 fun TrackContextMenu(
     track: Track?,
     bounds: Rect?,
     isVisible: Boolean,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    hazeState: HazeState
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -63,6 +63,15 @@ fun TrackContextMenu(
     val density = LocalDensity.current
     val config = LocalConfiguration.current
 
+    val springProgress by animateFloatAsState(
+        targetValue = if (isVisible && track != null && bounds != null && bounds != Rect.Zero) 1f else 0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "ContextMenuSpring"
+    )
+
     AnimatedVisibility(
         visible = isVisible && track != null && bounds != null && bounds != Rect.Zero,
         enter = fadeIn(),
@@ -71,7 +80,6 @@ fun TrackContextMenu(
     ) {
         if (track == null || bounds == null) return@AnimatedVisibility
 
-        // Convert Px bounds to Dp for Compose layout offsets
         val screenHeightDp = config.screenHeightDp.dp
         val screenWidthDp = config.screenWidthDp.dp
 
@@ -83,15 +91,10 @@ fun TrackContextMenu(
 
         val fitsBelow = (screenHeightDp - cardBottomDp) > 220.dp
 
-        val cardScale by animateFloatAsState(
-            targetValue = if (isVisible) 1.1f else 1.0f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMediumLow
-            )
-        )
+        val cardScale = 1.0f + (springProgress * 0.10f)
+        val menuScale = 0.85f + (springProgress * 0.15f)
+        val menuAlpha = (springProgress * 1.5f).coerceIn(0f, 1f)
 
-        // Calculate menu position & clamp within screen bounds
         val menuWidth = 240.dp
         val rawMenuLeft = cardLeftDp + (cardWidthDp / 2) - (menuWidth / 2)
         val menuLeft = rawMenuLeft.coerceIn(16.dp, (screenWidthDp - menuWidth - 16.dp).coerceAtLeast(16.dp))
@@ -102,17 +105,26 @@ fun TrackContextMenu(
             (cardTopDp - 200.dp - 16.dp).coerceAtLeast(16.dp)
         }
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.75f))
-                .pointerInput(Unit) {
-                    detectTapGestures(onTap = {
-                        context.performHapticClick()
-                        onDismiss()
-                    })
-                }
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .hazeBlur(
+                        input = HazeInput.Sources(state = hazeState),
+                        style = HazeBlurStyle {
+                            blurRadius((springProgress * 28).dp)
+                            noiseFactor(0f)
+                        }
+                    )
+                    .background(Color.Black.copy(alpha = springProgress * 0.65f))
+                    .pointerInput(Unit) {
+                        detectTapGestures(onTap = {
+                            context.performHapticClick()
+                            onDismiss()
+                        })
+                    }
+            )
+
             Box(
                 modifier = Modifier
                     .offset(x = cardLeftDp, y = cardTopDp)
@@ -120,6 +132,9 @@ fun TrackContextMenu(
                     .graphicsLayer {
                         scaleX = cardScale
                         scaleY = cardScale
+                        shadowElevation = (springProgress * 24).dp.toPx()
+                        shape = RoundedCornerShape(24.dp)
+                        clip = false
                     }
             ) {
                 SquareMusicCard(
@@ -134,6 +149,11 @@ fun TrackContextMenu(
                 modifier = Modifier
                     .offset(x = menuLeft, y = menuTop)
                     .width(menuWidth)
+                    .graphicsLayer {
+                        scaleX = menuScale
+                        scaleY = menuScale
+                        alpha = menuAlpha
+                    }
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
                     ContextMenuItem(
@@ -146,10 +166,10 @@ fun TrackContextMenu(
                         }
                     )
 
-                    Divider(color = Color.White.copy(alpha = 0.1f), modifier = Modifier.padding(horizontal = 16.dp))
+                    HorizontalDivider(color = Color.White.copy(alpha = 0.1f), modifier = Modifier.padding(horizontal = 16.dp))
 
                     ContextMenuItem(
-                        icon = Icons.Rounded.PlaylistAdd,
+                        icon = Icons.AutoMirrored.Rounded.PlaylistAdd,
                         title = "Add to Playlist",
                         onClick = {
                             context.performHapticClick()
@@ -158,7 +178,7 @@ fun TrackContextMenu(
                         }
                     )
 
-                    Divider(color = Color.White.copy(alpha = 0.1f), modifier = Modifier.padding(horizontal = 16.dp))
+                    HorizontalDivider(color = Color.White.copy(alpha = 0.1f), modifier = Modifier.padding(horizontal = 16.dp))
 
                     ContextMenuItem(
                         icon = if (isLiked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
