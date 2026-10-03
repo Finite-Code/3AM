@@ -33,6 +33,7 @@ cd 3AM
 # External Help
 AI/LLMs were used for the following things:
 - Antigravity: to generate a color scheme for the app logo. 
+- Android Studio's native tab to autocomplete (idk if it uses AI)
 
 > Not AI but: used online components to generate a boilerplate-UI for the web
 
