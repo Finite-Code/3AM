@@ -7,6 +7,12 @@ val versioningProps = Properties().apply {
     }
 }
 val currentBuildCounter = versioningProps.getProperty("build.counter")?.toIntOrNull() ?: 1
+val verMajor = versioningProps.getProperty("version.major") ?: "1"
+val verMinor = versioningProps.getProperty("version.minor") ?: "1"
+val verPatch = versioningProps.getProperty("version.patch") ?: "0"
+val verStatus = versioningProps.getProperty("version.status") ?: "stable"
+
+val formattedVersionName = "${verMajor}.${verMinor}.${verPatch}-${verStatus}"
 
 plugins {
     alias(libs.plugins.android.application)
@@ -22,7 +28,7 @@ android {
         minSdk = 33
         targetSdk = 37
         versionCode = currentBuildCounter
-        versionName = "1.0.0-$currentBuildCounter"
+        versionName = formattedVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         resourceConfigurations.addAll(listOf("en"))
@@ -49,10 +55,29 @@ android {
 }
 
 tasks.register("incrementBuildCounter"){
-    description = "Changes build count on every succesful build."
+    description = "Updates release notes and increments build count on every succesful build."
     doLast {
+        val relNotesFile = rootProject.file("releasenotes.latest")
+        if (relNotesFile.exists()) {
+            val notesText = relNotesFile.readText()
+            val updatedNotes = if (notesText.contains(Regex("""(?m)^v\d+\.\d+\.\d+"""))) {
+                notesText.replaceFirst(Regex("""(?m)^v\d+\.\d+\.\d+.*"""), "v$formattedVersionName")
+            } else {
+                "# 3AM\nv$formattedVersionName\n\n" + notesText
+            }
+            relNotesFile.writeText(updatedNotes)
+        }
+
         val nextCounter = currentBuildCounter + 1
-        versioningFile.writeText("build.counter=$nextCounter\n")
+        versioningFile.writeText(
+            """
+            version.major=$verMajor
+            version.minor=$verMinor
+            version.patch=$verPatch
+            version.status=$verStatus
+            build.counter=$nextCounter
+            """.trimIndent() + "\n"
+        )
     }
 }
 

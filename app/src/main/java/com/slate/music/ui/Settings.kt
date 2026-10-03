@@ -96,8 +96,7 @@ fun SettingsScreen(
                 null
             }
         }
-        val versionName = packageInfo?.versionName ?: "1.0.0"
-        val cleanVersionName = versionName.substringBefore('-')
+        val versionName = packageInfo?.versionName ?: "1.1.0-stable"
 
         Box(
             modifier = Modifier
@@ -205,7 +204,7 @@ fun SettingsScreen(
                     SettingsItemClickable(
                         icon = Icons.Rounded.Info,
                         title = "About?",
-                        value = "v$cleanVersionName",
+                        value = "v$versionName",
                         onClick = {
                             context.performHapticClick()
                             isAboutOpen = true

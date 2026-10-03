@@ -110,8 +110,7 @@ fun AboutScreen(
                 null
             }
         }
-        val versionName = packageInfo?.versionName ?: "1.0.0"
-        val cleanVersionName = versionName.substringBefore('-')
+        val versionName = packageInfo?.versionName ?: "1.1.0-stable"
         val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             packageInfo?.longVersionCode ?: 1L
         } else {
@@ -195,7 +194,7 @@ fun AboutScreen(
                                 color = Color(0xFF242424)
                             ) {
                                 Text(
-                                    text = "v$cleanVersionName • Build #$versionCode",
+                                    text = "v$versionName • Build #$versionCode",
                                     color = Color.LightGray,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
@@ -216,7 +215,7 @@ fun AboutScreen(
                         icon = Icons.Rounded.Build,
                         title = "Build & Version",
                         subtitle = "build #$versionCode",
-                        value = "v$cleanVersionName"
+                        value = "v$versionName"
                     )
                 }
 
