@@ -30,14 +30,13 @@ cd 3AM
 ./gradlew assembleDebug
 ```
 
-# External Help
+## External Help
 AI/LLMs were used for the following things:
 - Antigravity: to generate a color scheme for the app logo. 
 - Android Studio's native tab to autocomplete (idk if it uses AI)
 - To setup regex matching [`3ae56a`](https://github.com/Finite-Code/3AM/commit/3ae56adf39d562150be1c68298d3a0579f4cecf8)
 
 > Not AI but: used online components to generate a boilerplate-UI for the web
-
 
 ## 🧑‍⚖️ License
 **This project utilizes GPL-3.0 LICENSE**
