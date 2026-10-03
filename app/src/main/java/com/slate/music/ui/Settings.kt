@@ -117,7 +117,7 @@ fun SettingsScreen(
                     .fillMaxSize()
                     .hazeSource(state = hazeState),
                 contentPadding = PaddingValues(
-                    top = 130.dp,
+                    top = 180.dp,
                     bottom = 120.dp,
                     start = 20.dp,
                     end = 20.dp
