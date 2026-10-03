@@ -2,8 +2,10 @@
 
 package com.slate.music.ui
 
+import android.view.RoundedCorner
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
@@ -29,6 +31,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -39,128 +42,136 @@ import androidx.compose.ui.unit.sp
 import com.slate.music.AppSettings
 import com.slate.music.amp.AmpEngine
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 
 @Composable
 fun TrackContextMenu(
     track: Track?,
+    bounds: Rect?,
     isVisible: Boolean,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    // Quick look-ups
     val songs by HeartEngine.songs.collectAsState()
     val favTrackIds by AppSettings.favoriteTrackIds.collectAsState()
-
     val isLiked = track?.id in favTrackIds
 
-    val popAnimSpec = spring<Float>(
-        dampingRatio = Spring.DampingRatioMediumBouncy,
-        stiffness = Spring.StiffnessMediumLow
-    )
-
-    val slideAnimSpec = spring<IntOffset>(
-        dampingRatio = Spring.DampingRatioMediumBouncy,
-        stiffness = Spring.StiffnessMediumLow
-    )
+    val density = LocalDensity.current
+    val config = LocalConfiguration.current
 
     AnimatedVisibility(
-        visible = isVisible && track != null,
+        visible = isVisible && track != null && bounds != null && bounds != Rect.Zero,
         enter = fadeIn(),
         exit = fadeOut(),
         modifier = Modifier.fillMaxSize()
     ) {
-        if (track == null) return@AnimatedVisibility
+        if (track == null || bounds == null) return@AnimatedVisibility
+
+        // Convert Px bounds to Dp for Compose layout offsets
+        val screenHeightDp = config.screenHeightDp.dp
+        val screenWidthDp = config.screenWidthDp.dp
+
+        val cardLeftDp = with(density) { bounds.left.toDp() }
+        val cardTopDp = with(density) { bounds.top.toDp() }
+        val cardWidthDp = with(density) { bounds.width.toDp() }
+        val cardHeightDp = with(density) { bounds.height.toDp() }
+        val cardBottomDp = cardTopDp + cardHeightDp
+
+        val fitsBelow = (screenHeightDp - cardBottomDp) > 220.dp
+
+        val cardScale by animateFloatAsState(
+            targetValue = if (isVisible) 1.1f else 1.0f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            )
+        )
+
+        // Calculate menu position & clamp within screen bounds
+        val menuWidth = 240.dp
+        val rawMenuLeft = cardLeftDp + (cardWidthDp / 2) - (menuWidth / 2)
+        val menuLeft = rawMenuLeft.coerceIn(16.dp, (screenWidthDp - menuWidth - 16.dp).coerceAtLeast(16.dp))
+
+        val menuTop = if (fitsBelow) {
+            cardBottomDp + 20.dp
+        } else {
+            (cardTopDp - 200.dp - 16.dp).coerceAtLeast(16.dp)
+        }
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.7f))
+                .background(Color.Black.copy(alpha = 0.75f))
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
                         context.performHapticClick()
                         onDismiss()
                     })
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(32.dp)
-            ) {
-                AnimatedVisibility(
-                    visible = isVisible,
-                    enter = scaleIn(initialScale = 0.8f, animationSpec = popAnimSpec) + fadeIn(),
-                    exit = scaleOut(targetScale = 0.8f) + fadeOut()
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.85f)
-                            .aspectRatio(1f)
-                    ) {
-                        SquareMusicCard(
-                            track = track,
-                            onClick = { },
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
                 }
-                
-                Spacer(modifier = Modifier.height(24.dp))
-
-                AnimatedVisibility(
-                    visible = isVisible,
-                    enter = slideInVertically(initialOffsetY = { 50 }, animationSpec = slideAnimSpec) + fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(24.dp),
-                        color = Color(0xFF1E1E1E),
-                        modifier = Modifier.fillMaxWidth(0.85f)
-                    ) {
-                        Column(modifier = Modifier.padding(8.dp)) {
-                            ContextMenuItem(
-                                icon = Icons.Rounded.QueuePlayNext,
-                                title = "Play Next",
-                                onClick = {
-                                    context.performHapticClick()
-                                    songs.find { it.id.toString() == track.id }?.let { AmpEngine.playNext(it) }
-                                    onDismiss()
-                                }
-                            )
-                            
-                            Divider(color = Color.White.copy(alpha = 0.1f), modifier = Modifier.padding(horizontal = 16.dp))
-                            
-                            ContextMenuItem(
-                                icon = Icons.Rounded.PlaylistAdd,
-                                title = "Add to Playlist",
-                                onClick = {
-                                    context.performHapticClick()
-                                    // TODO: Gotta hook up to playlit dialog
-                                    onDismiss()
-                                }
-                            )
-
-                            Divider(color = Color.White.copy(alpha = 0.1f), modifier = Modifier.padding(horizontal = 16.dp))
-
-                            ContextMenuItem(
-                                icon = if (isLiked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                                title = if (isLiked) "Remove from Favorites" else "Add to Favorites",
-                                tint = if (isLiked) Color.Red else Color.White,
-                                onClick = {
-                                    context.performHapticClick()
-                                    coroutineScope.launch {
-                                        AppSettings.toggleFavorite(context, track.id)
-                                    }
-                                    onDismiss()
-                                }
-                            )
-                        }
+        ) {
+            Box(
+                modifier = Modifier
+                    .offset(x = cardLeftDp, y = cardTopDp)
+                    .size(width = cardWidthDp, height = cardHeightDp)
+                    .graphicsLayer {
+                        scaleX = cardScale
+                        scaleY = cardScale
                     }
+            ) {
+                SquareMusicCard(
+                    track = track,
+                    onClick = { }
+                )
+            }
+
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = Color(0xFF1E1E1E),
+                modifier = Modifier
+                    .offset(x = menuLeft, y = menuTop)
+                    .width(menuWidth)
+            ) {
+                Column(modifier = Modifier.padding(8.dp)) {
+                    ContextMenuItem(
+                        icon = Icons.Rounded.QueuePlayNext,
+                        title = "Play Next",
+                        onClick = {
+                            context.performHapticClick()
+                            songs.find { it.id.toString() == track.id }?.let { AmpEngine.playNext(it) }
+                            onDismiss()
+                        }
+                    )
+
+                    Divider(color = Color.White.copy(alpha = 0.1f), modifier = Modifier.padding(horizontal = 16.dp))
+
+                    ContextMenuItem(
+                        icon = Icons.Rounded.PlaylistAdd,
+                        title = "Add to Playlist",
+                        onClick = {
+                            context.performHapticClick()
+                            // FIXME: Hook up to playlist dialog
+                            onDismiss()
+                        }
+                    )
+
+                    Divider(color = Color.White.copy(alpha = 0.1f), modifier = Modifier.padding(horizontal = 16.dp))
+
+                    ContextMenuItem(
+                        icon = if (isLiked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                        title = if (isLiked) "Remove from Favorites" else "Add to Favorites",
+                        tint = if (isLiked) Color.Red else Color.White,
+                        onClick = {
+                            context.performHapticClick()
+                            coroutineScope.launch {
+                                AppSettings.toggleFavorite(context, track.id)
+                            }
+                            onDismiss()
+                        }
+                    )
                 }
             }
         }

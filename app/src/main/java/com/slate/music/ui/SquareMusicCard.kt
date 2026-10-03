@@ -3,7 +3,7 @@ package com.slate.music.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,23 +22,32 @@ import coil.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SquareMusicCard(
     track: Track,
     onClick: () -> Unit,
-    onLongClick: (() -> Unit)? = null,
+    onLongClick: ((Rect) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+
+    var cardBounds by remember { mutableStateOf(Rect.Zero) }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(1f)
+            .onGloballyPositioned { coordinates ->
+                cardBounds = coordinates.boundsInWindow()
+            }
             .pointerInput(Unit) {
                 detectTapGestures(
-                    onLongPress = { onLongClick?.invoke() },
-                    onTap = { onClick() }
+                    onTap = { onClick() },
+                    onLongPress = { onLongClick?.invoke(cardBounds) }
                 )
             },
         shape = RoundedCornerShape(24.dp),

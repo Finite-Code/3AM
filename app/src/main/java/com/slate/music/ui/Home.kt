@@ -56,6 +56,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.ui.geometry.Rect
 import coil.compose.AsyncImage
 
 data class Track(
@@ -183,7 +184,8 @@ fun HomeScreen() {
     val config = LocalConfiguration.current
     val screenWidthPx = with(density) { config.screenWidthDp.dp.toPx() }
 
-    var contextMenuTrack by remember {mutableStateOf<Track?>(null)}
+    var contextMenuTrack by remember { mutableStateOf<Track?>(null) }
+    var contextMenuBounds by remember { mutableStateOf<Rect?>(null) }
 
     val dragAnim = remember { Animatable(0f) }
     val coroutineScope = rememberCoroutineScope()
@@ -267,9 +269,10 @@ fun HomeScreen() {
                             title = "Top Played",
                             tracks = displayTracks,
                             onTrackSelected = handleTrackSelected,
-                            onTrackLongClicked = { track ->
-                                contextMenuTrack = track
+                            onTrackLongClicked = { track, bounds ->
                                 context.performHapticClick()
+                                contextMenuTrack = track
+                                contextMenuBounds = bounds
                             }
                         )
                     }
@@ -279,9 +282,10 @@ fun HomeScreen() {
                             title = "Your Top Artists",
                             tracks = displayTracks,
                             onTrackSelected = handleTrackSelected,
-                            onTrackLongClicked = { track ->
-                                contextMenuTrack = track
+                            onTrackLongClicked = { track, bounds ->
                                 context.performHapticClick()
+                                contextMenuTrack = track
+                                contextMenuBounds = bounds
                             }
                         )
                     }
@@ -291,9 +295,10 @@ fun HomeScreen() {
                             title = "Favourites <3",
                             tracks = favTracks,
                             onTrackSelected = handleTrackSelected,
-                            onTrackLongClicked = { track ->
-                                contextMenuTrack = track
+                            onTrackLongClicked = { track, bounds ->
                                 context.performHapticClick()
+                                contextMenuTrack = track
+                                contextMenuBounds = bounds
                             }
                         )
                     }
@@ -381,8 +386,12 @@ fun HomeScreen() {
 
             TrackContextMenu(
                 track = contextMenuTrack,
+                bounds = contextMenuBounds,
                 isVisible = contextMenuTrack != null,
-                onDismiss = { contextMenuTrack = null }
+                onDismiss = {
+                    contextMenuTrack = null
+                    contextMenuBounds = null
+                }
             )
 
             if (showAddToPlaylistDialog && ampState.currentSong != null){
@@ -608,7 +617,7 @@ fun MusicSectionRow(
     title: String,
     tracks: List<Track>,
     onTrackSelected: (Track) -> Unit,
-    onTrackLongClicked: ((Track) -> Unit)? = null
+    onTrackLongClicked: ((Track, Rect) -> Unit)? = null
 ) {
     Column(
         modifier = Modifier
@@ -641,7 +650,7 @@ fun MusicSectionRow(
                     SquareMusicCard(
                         track = track,
                         onClick = { onTrackSelected(track) },
-                        onLongClick = {onTrackLongClicked?.invoke(track)},
+                        onLongClick = { bounds -> onTrackLongClicked?.invoke(track, bounds) },
                         modifier = Modifier.width(176.dp)
                     )
                 }
