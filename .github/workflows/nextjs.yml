@@ -1,11 +1,7 @@
 name: Deploy Next.js site to Pages
 
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - 'web/**'
-      - '.github/workflows/nextjs.yml'
+  push: # Will run it manually ONLY
   workflow_dispatch:
 
 permissions:
