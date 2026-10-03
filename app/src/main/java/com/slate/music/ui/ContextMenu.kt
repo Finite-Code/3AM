@@ -67,7 +67,7 @@ fun TrackContextMenu(
         targetValue = if (isVisible && track != null && bounds != null && bounds != Rect.Zero) 1f else 0f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioLowBouncy,
-            stiffness = Spring.StiffnessLow
+            stiffness = Spring.StiffnessMedium
         ),
         label = "ContextMenuSpring"
     )
