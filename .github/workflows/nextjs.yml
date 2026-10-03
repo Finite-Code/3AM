@@ -1,7 +1,7 @@
 name: Deploy Next.js site to Pages
 
 on:
-  push: # Will run it manually ONLY
+  # Will run it manually ONLY
   workflow_dispatch:
 
 permissions:
