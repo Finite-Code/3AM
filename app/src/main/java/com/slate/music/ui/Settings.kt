@@ -2,38 +2,38 @@
 
 package com.slate.music.ui
 
-import com.slate.music.AppSettings
-import com.slate.music.util.DeadEndHapticHandler
-import com.slate.music.util.performHapticClick
-
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
+import com.slate.music.AppSettings
+import com.slate.music.util.DeadEndHapticHandler
+import com.slate.music.util.performHapticClick
 import dev.chrisbanes.haze.*
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.activity.compose.PredictiveBackHandler
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
-import kotlinx.coroutines.CancellationException
+import dev.chrisbanes.haze.blur.HazeBlurStyle
+import dev.chrisbanes.haze.blur.hazeBlur
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -117,44 +117,13 @@ fun SettingsScreen(
                     .fillMaxSize()
                     .hazeSource(state = hazeState),
                 contentPadding = PaddingValues(
-                    top = 64.dp,
+                    top = 130.dp,
                     bottom = 120.dp,
                     start = 20.dp,
                     end = 20.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 24.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "settings",
-                            style = MaterialTheme.typography.displayLarge.copy(
-                                fontSize = 72.sp
-                            ),
-                            color = Color.White
-                        )
-
-                        Surface(
-                            shape = CircleShape,
-                            color = Color(0xFF1E1E1E),
-                            modifier = Modifier.size(40.dp)
-                        ) {
-                            IconButton(onClick = onClose) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Close,
-                                    contentDescription = "Close Settings",
-                                    tint = Color.White
-                                )
-                            }
-                        }
-                    }
-                }
 
                 /* SECTION 1: Audio */
                 item {
@@ -222,7 +191,7 @@ fun SettingsScreen(
                         title = "Haptic Feedback",
                         subtitle = "Enable or disable haptic feedback",
                         checked = isHapticsEnabled,
-                        onCheckedChange = {AppSettings.setHapticsEnabled(context, it) }
+                        onCheckedChange = { AppSettings.setHapticsEnabled(context, it) }
                     )
                 }
 
@@ -242,6 +211,68 @@ fun SettingsScreen(
                             isAboutOpen = true
                         }
                     )
+                }
+            }
+
+            // Fixed Floating Header with Progressive Haze Blur
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter)
+                    .then(
+                        if (isBlurEnabled) {
+                            Modifier.hazeBlur(
+                                input = HazeInput.Sources(state = hazeState),
+                                style = HazeBlurStyle {
+                                    blurRadius(24.dp)
+                                    noiseFactor(0f)
+                                    progressive(
+                                        HazeProgressive.verticalGradient(
+                                            startIntensity = 0.90f,
+                                            endIntensity = 0.0f
+                                        )
+                                    )
+                                }
+                            )
+                        } else Modifier
+                    )
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Black.copy(alpha = if (isBlurEnabled) 0.85f else 1.0f),
+                                Color.Black.copy(alpha = if (isBlurEnabled) 0.35f else 0.70f),
+                                Color.Transparent
+                            )
+                        )
+                    )
+                    .padding(top = 48.dp, start = 20.dp, end = 20.dp, bottom = 16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "settings",
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontSize = 64.sp
+                        ),
+                        color = Color.White
+                    )
+
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFF1E1E1E),
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        IconButton(onClick = onClose) {
+                            Icon(
+                                imageVector = Icons.Rounded.Close,
+                                contentDescription = "Close Settings",
+                                tint = Color.White
+                            )
+                        }
+                    }
                 }
             }
 
