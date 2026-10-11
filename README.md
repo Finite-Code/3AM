@@ -20,7 +20,7 @@
 
 ### Prerequisites:
 - Android Studio Ladybug or newer.
-- JDK 11/17.
+- JDK 11 --> 17. (depending on your installation)
 - Android device or emulator running API 33+. (**Android 13+**)
 
 ### Spinning it Up:
