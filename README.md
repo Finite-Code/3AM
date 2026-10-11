@@ -20,7 +20,7 @@
 
 ### Prerequisites:
 - Android Studio Ladybug or newer.
-- JDK 11 / 17.
+- JDK 11/17.
 - Android device or emulator running API 33+. (**Android 13+**)
 
 ### Spinning it Up:
@@ -35,6 +35,7 @@ AI/LLMs were used for the following things:
 - Antigravity: to generate a color scheme for the app logo. 
 - Android Studio's native tab to autocomplete (idk if it uses AI)
 - To setup regex matching [`3ae56a`](https://github.com/Finite-Code/3AM/commit/3ae56adf39d562150be1c68298d3a0579f4cecf8)
+- ChatGPT Web: However I've honestly forgot the exact files/commits. Well under fair usage though :)
 
 > Not AI but: used online components to generate a boilerplate-UI for the web
 
