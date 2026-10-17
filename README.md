@@ -8,9 +8,26 @@
 - **HeartEngine**: A local Mediastore based scanner that automatically scans and categorizes music with a efficient local database and automatic updates.
 - **Aesthetics**: While not a technical feature, the app features slick glassmorphism/realtime-blurs and a dark/moody OLED vibe.
 
-## Screenshots
-<img width="1728" height="1117" alt="MacBook Pro 16_ - 1(1)" src="https://github.com/user-attachments/assets/fba780c7-d035-457c-8660-47b4e774a23b" />
+## Screenshots & Demo
 
+<div align="center">
+  <img 
+    src="https://github.com/user-attachments/assets/fba780c7-d035-457c-8660-47b4e774a23b" 
+    alt="App Preview" 
+    width="100%" 
+  />
+
+  <br /><br />
+
+  <a href="https://www.youtube.com/watch?v=E0SEvP28f9g" target="_blank" rel="noopener noreferrer">
+    <img 
+      src="https://img.youtube.com/vi/E0SEvP28f9g/hqdefault.jpg" 
+      alt="Video Demo" 
+      width="600" 
+    />
+  </a>
+  <p><em>^^ Click above to watch the video demo ^^</em></p>
+</div>
 
 ## The Stack
 - **UI**: Jetpack Compose, Material 3 Expressive, Coil, [Haze from chrisbanes](https://chrisbanes.github.io/haze/latest/)
