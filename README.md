@@ -19,7 +19,7 @@
 
   <br /><br />
 
-  <a href="https://www.youtube.com/watch?v=E0SEvP28f9g" target="_blank" rel="noopener noreferrer">
+  <a href="https://www.youtube.com/shorts/E0SEvP28f9g" target="_blank" rel="noopener noreferrer">
     <img 
       src="https://img.youtube.com/vi/E0SEvP28f9g/hqdefault.jpg" 
       alt="Video Demo" 
